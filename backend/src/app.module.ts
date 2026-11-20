@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { createObserveModule } from '@nestjs/observe';
@@ -14,6 +15,8 @@ import {
   PayslipItem,
   AuditLog,
 } from './entities/index.js';
+import { AuthModule } from './auth/auth.module.js';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -44,7 +47,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
           AuditLog,
         ],
         autoLoadEntities: true,
-        synchronize: true, // Will automatically generate/sync tables on startup
+        synchronize: true,
         extra: {
           max: 20,
           min: 5,
@@ -52,6 +55,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         },
       }),
     }),
+    AuthModule,
     ObserveModule.forRoot({
       appKey: process.env.OBSERVE_APP_KEY ?? 'YOUR_APP_KEY',
       appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',
@@ -59,6 +63,12 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

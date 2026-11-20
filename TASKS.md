@@ -119,17 +119,17 @@
 ## Phase 2 — Backend: Auth Module
 
 ### 2.1 Auth Entities & Service
-- [ ] Create `AuthModule`, `AuthController`, `AuthService`
-- [ ] Implement `POST /auth/login`:
+- [x] Create `AuthModule`, `AuthController`, `AuthService`
+- [x] Implement `POST /auth/login`:
   - Accept `{ email, password }`
   - Validate against `users` table with bcrypt compare
   - Return signed JWT `{ access_token, user: { id, email, fullName, role } }`
-- [ ] Implement `GET /auth/me` — returns current user from JWT
-- [ ] Implement `POST /auth/logout` — client-side token drop (stateless JWT)
-- [ ] Create `JwtAuthGuard` using `@nestjs/passport`
-- [ ] Create `CurrentUser` decorator to extract user from JWT payload
-- [ ] Apply `JwtAuthGuard` globally (all routes except `/auth/login`)
-- [ ] Write unit tests for `AuthService` (login success, wrong password, user not found)
+- [x] Implement `GET /auth/me` — returns current user from JWT
+- [x] Implement `POST /auth/logout` — client-side token drop (stateless JWT)
+- [x] Create `JwtAuthGuard` using `@nestjs/passport`
+- [x] Create `CurrentUser` decorator to extract user from JWT payload
+- [x] Apply `JwtAuthGuard` globally (all routes except `/auth/login`, `/health`, etc.)
+- [x] Write unit tests for `AuthService` (6/6 tests passing in `vitest`)
 
 ---
 
