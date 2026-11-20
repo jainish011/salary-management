@@ -476,36 +476,36 @@
 ## Phase 13 — Frontend: Payroll Pages
 
 ### 13.1 Payroll List Page
-- [ ] Create `api/payroll.ts` — all payroll API calls
-- [ ] Build `PayrollListPage`:
-  - [ ] Table: Period Name, Employees Count, Total Net Pay, Status badge, Actions
-  - [ ] Status: OPEN (yellow/amber), LOCKED (red/locked icon)
-  - [ ] Actions: "Run & View" for OPEN, "View" for LOCKED
-  - [ ] "+ Open New Period" button → modal/dialog with month+year picker
-  - [ ] Server-side pagination (10 per page)
+- [x] Create `api/payroll.ts` — all payroll API calls
+- [x] Build `PayrollListPage`:
+  - [x] Table: Period Name, Employees Count, Total Net Pay, Status badge, Actions
+  - [x] Status: OPEN (yellow/amber), LOCKED (red/locked icon)
+  - [x] Actions: "Run & View" for OPEN, "View" for LOCKED
+  - [x] "+ Open New Period" button → modal/dialog with month+year picker
+  - [x] Server-side pagination (10 per page)
 
 ### 13.2 Payroll Detail Page
-- [ ] Build `PayrollDetailPage`:
-  - [ ] Period header: name, dates, status badge
-  - [ ] Summary strip (shown after payroll run): Employees Processed, Total Gross, Total Net, Total PF, Total TDS
-  - [ ] Action bar:
+- [x] Build `PayrollDetailPage`:
+  - [x] Period header: name, dates, status badge
+  - [x] Summary strip (shown after payroll run): Employees Processed, Total Gross, Total Net, Total PF, Total TDS
+  - [x] Action bar:
     - If OPEN + not run: "▶ Run Payroll" button (with confirm dialog)
     - If OPEN + run: "▶ Re-run Payroll" + "🔒 Lock Period" buttons
     - If LOCKED: read-only banner
-  - [ ] Run payroll loading state (progress indicator while API call runs)
-  - [ ] Payslips table: Emp ID, Name, Gross, Deductions, Net Pay, Actions (View Payslip)
-  - [ ] Search + Department filter on payslips table
-  - [ ] Server-side pagination (20 per page)
+  - [x] Run payroll loading state (progress indicator while API call runs)
+  - [x] Payslips table: Emp ID, Name, Gross, Deductions, Net Pay, Actions (View Payslip)
+  - [x] Search + Department filter on payslips table
+  - [x] Server-side pagination (20 per page)
 
 ### 13.3 Payslip View Page
-- [ ] Build `PayslipViewPage`:
-  - [ ] Styled payslip document layout (matches Indian payslip format from design doc)
-  - [ ] Header: Company name, payslip month, employee details (name, ID, PAN, UAN, designation, dept, location, tax regime)
-  - [ ] Two-column layout: Earnings (left) | Deductions (right)
-  - [ ] Line items from `payslip_items` ordered by sort_order
-  - [ ] Footer: Gross, Total Deductions, Net Pay (highlighted)
-  - [ ] Employer contributions section below (Employer PF, Gratuity, Monthly CTC)
-  - [ ] "🖨 Print" button (triggers `window.print()`)
+- [x] Build `PayslipViewPage`:
+  - [x] Styled payslip document layout (matches Indian payslip format from design doc)
+  - [x] Header: Company name, payslip month, employee details (name, ID, PAN, UAN, designation, dept, location, tax regime)
+  - [x] Two-column layout: Earnings (left) | Deductions (right)
+  - [x] Line items from `payslip_items` ordered by sort_order
+  - [x] Footer: Gross, Total Deductions, Net Pay (highlighted)
+  - [x] Employer contributions section below (Employer PF, Gratuity, Monthly CTC)
+  - [x] "🖨 Print" button (triggers `window.print()`)
 
 ---
 
