@@ -148,37 +148,37 @@
 ## Phase 4 — Backend: Employees Module
 
 ### 4.1 Employee CRUD
-- [ ] Create `EmployeesModule`, `EmployeesController`, `EmployeesService`
-- [ ] Implement `POST /employees` — create employee:
+- [x] Create `EmployeesModule`, `EmployeesController`, `EmployeesService`
+- [x] Implement `POST /employees` — create employee:
   - Validate DTO (required fields, email uniqueness)
   - Auto-generate `employeeCode` (EMP + zero-padded sequence)
   - Also create initial `SalaryStructure` record from CTC input
   - Log to `audit_logs` (action: CREATE)
-- [ ] Implement `GET /employees/:id` — employee detail with current salary:
+- [x] Implement `GET /employees/:id` — employee detail with current salary:
   - Join with department
   - Join salary_structures WHERE effectiveTo IS NULL (using partial index)
   - Return full profile + currentSalary object
-- [ ] Implement `PATCH /employees/:id` — update personal/employment fields:
+- [x] Implement `PATCH /employees/:id` — update personal/employment fields:
   - Validate DTO
   - Log changed fields to `audit_logs`
-- [ ] Implement `DELETE /employees/:id` — soft delete:
+- [x] Implement `DELETE /employees/:id` — soft delete:
   - Set `employmentStatus = TERMINATED`, `dateOfLeaving = today`
   - Log to `audit_logs`
 
 ### 4.2 Employee List with Pagination & Filters
-- [ ] Implement `GET /employees` with full filter + pagination support:
+- [x] Implement `GET /employees` with full filter + pagination support:
   - Query builder with optional WHERE clauses for: `departmentId`, `grade`, `employmentStatus`, `workCity`, `workState`
   - Full-text search on `search` param using GIN index (`to_tsquery`)
   - CTC range filter via JOIN to current salary structure
   - `sortBy` / `order` support
   - `LIMIT/OFFSET` pagination
   - Return `{ data: [...], meta: { total, page, limit, totalPages } }`
-- [ ] Cache filtered list results in Redis (key: MD5 hash of query params, TTL: 2 min)
+- [x] Cache filtered list results in Redis (key: MD5 hash of query params, TTL: 2 min)
 
 ### 4.3 Salary History & Revisions
-- [ ] Implement `GET /employees/:id/salary-history` — paginated list of all SalaryStructure records for employee, ordered by effectiveFrom DESC
-- [ ] Create `SalaryStructuresModule`, `SalaryStructuresController`, `SalaryStructuresService`
-- [ ] Implement `POST /salary-structures` — salary revision:
+- [x] Implement `GET /employees/:id/salary-history` — paginated list of all SalaryStructure records for employee, ordered by effectiveFrom DESC
+- [x] Create `SalaryStructuresModule`, `SalaryStructuresController`, `SalaryStructuresService`
+- [x] Implement `POST /salary-structures` — salary revision:
   - Validate: employee exists, effectiveFrom is valid date
   - Close current active record: set `effectiveTo = effectiveFrom - 1 day`
   - Compute new salary breakdown from annual CTC:
@@ -191,16 +191,16 @@
   - Insert new SalaryStructure record
   - Invalidate Redis caches: `dashboard:kpis`, `reports:*`
   - Log to `audit_logs`
-- [ ] Implement `GET /salary-structures/:id` — single record detail
+- [x] Implement `GET /salary-structures/:id` — single record detail
 
 ### 4.4 Employee Payslip History
-- [ ] Implement `GET /employees/:id/payslips` — paginated list of payslips for employee (from payslips table, ordered by period descending)
+- [x] Implement `GET /employees/:id/payslips` — paginated list of payslips for employee (from payslips table, ordered by period descending)
 
 ### 4.5 Employee Unit Tests
-- [ ] Unit test: `EmployeesService.create()` — validates DTO, creates employee + salary structure
-- [ ] Unit test: `EmployeesService.findAll()` — pagination math, filter logic
-- [ ] Unit test: `SalaryStructuresService.createRevision()` — SCD2 close + new record
-- [ ] Unit test: salary breakdown computation (Basic, HRA, Special Allow for given CTC)
+- [x] Unit test: `EmployeesService.create()` — validates DTO, creates employee + salary structure
+- [x] Unit test: `EmployeesService.findAll()` — pagination math, filter logic
+- [x] Unit test: `SalaryStructuresService.createRevision()` — SCD2 close + new record
+- [x] Unit test: salary breakdown computation (Basic, HRA, Special Allow for given CTC)
 
 ---
 
