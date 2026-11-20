@@ -414,16 +414,16 @@
 
 ## Phase 11 — Frontend: Dashboard Page
 
-- [ ] Create `api/reports.ts` — dashboard KPIs, department summary, salary distribution, audit log fetching functions
-- [ ] Build `DashboardPage`:
-  - [ ] Summary strip: 4 KPI cards (Active Employees, Monthly Payroll, Current Period, Pending Actions)
-  - [ ] Payroll cost by department — Recharts `BarChart` (horizontal)
-  - [ ] Headcount by department — Recharts `BarChart`
-  - [ ] Salary distribution by CTC band — Recharts `BarChart` (histogram)
-  - [ ] Recent activity feed — last 5 audit log entries with action descriptions
-  - [ ] Quick action buttons: Add Employee, Open New Period
-- [ ] Use TanStack Query with `staleTime: 5 * 60 * 1000` for dashboard data
-- [ ] Show loading skeletons while data fetches
+- [x] Create `api/reports.ts` — dashboard KPIs, department summary, salary distribution, audit log fetching functions
+- [x] Build `DashboardPage`:
+  - [x] Summary strip: 4 KPI cards (Active Employees, Monthly Payroll, Current Period, Pending Actions)
+  - [x] Payroll cost by department — Recharts `BarChart` (horizontal)
+  - [x] Headcount by department — Recharts `BarChart`
+  - [x] Salary distribution by CTC band — Recharts `BarChart` (histogram)
+  - [x] Recent activity feed — last 5 audit log entries with action descriptions
+  - [x] Quick action buttons: Add Employee, Open New Period
+- [x] Use TanStack Query with `staleTime: 5 * 60 * 1000` for dashboard data
+- [x] Show loading skeletons while data fetches
 
 ---
 
