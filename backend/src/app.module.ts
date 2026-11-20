@@ -18,6 +18,7 @@ import {
 import { AuthModule } from './auth/auth.module.js';
 import { DepartmentsModule } from './departments/departments.module.js';
 import { EmployeesModule } from './employees/employees.module.js';
+import { PayrollModule } from './payroll/payroll.module.js';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -60,6 +61,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AuthModule,
     DepartmentsModule,
     EmployeesModule,
+    PayrollModule,
     ObserveModule.forRoot({
       appKey: process.env.OBSERVE_APP_KEY ?? 'YOUR_APP_KEY',
       appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',

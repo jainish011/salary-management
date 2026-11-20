@@ -259,18 +259,18 @@
 ## Phase 6 — Backend: Payroll Periods Module
 
 ### 6.1 Payroll Period CRUD
-- [ ] Create `PayrollModule`, `PayrollController`, `PayrollService`
-- [ ] Implement `GET /payroll-periods` — paginated list (page, limit), ordered by year DESC, month DESC
-- [ ] Implement `POST /payroll-periods` — open a new period:
+- [x] Create `PayrollModule`, `PayrollController`, `PayrollService`
+- [x] Implement `GET /payroll-periods` — paginated list (page, limit), ordered by year DESC, month DESC
+- [x] Implement `POST /payroll-periods` — open a new period:
   - Validate no existing OPEN period for same month/year
   - Auto-set `fiscalYear` (e.g., Nov 2026 → "2026-27")
   - Status defaults to `OPEN`
   - Log to `audit_logs`
-- [ ] Implement `GET /payroll-periods/:id` — period detail + summary stats
-- [ ] Implement `GET /payroll-periods/:id/payslips` — paginated payslips for period with search + departmentId filter
+- [x] Implement `GET /payroll-periods/:id` — period detail + summary stats
+- [x] Implement `GET /payroll-periods/:id/payslips` — paginated payslips for period with search + departmentId filter
 
 ### 6.2 Payroll Run
-- [ ] Implement `POST /payroll-periods/:id/run`:
+- [x] Implement `POST /payroll-periods/:id/run`:
   - Guard: period must be in OPEN status (reject if LOCKED)
   - Guard: cannot re-run if payslips already exist for this period
   - Set period status to `PROCESSING`
@@ -283,21 +283,21 @@
   - Invalidate Redis cache: `dashboard:kpis`, `reports:*`
   - Log payroll run event to `audit_logs`
   - Return run summary (totalEmployees, totalGross, totalNet, durationMs)
-- [ ] Implement `POST /payroll-periods/:id/lock`:
+- [x] Implement `POST /payroll-periods/:id/lock`:
   - Guard: period must be OPEN and must have been run (runAt != null)
   - Set status to `LOCKED`, set `lockedAt`
   - Log to `audit_logs`
 
 ### 6.3 Payslip API
-- [ ] Create `PayslipsController`
-- [ ] Implement `GET /payslips/:id` — full payslip with line items, employee info, period info
+- [x] Create `PayslipsController`
+- [x] Implement `GET /payslips/:id` — full payslip with line items, employee info, period info
 
 ### 6.4 Payroll Unit Tests
-- [ ] Test: `PayrollService.run()` — processes correct number of employees
-- [ ] Test: `PayrollService.run()` — throws if period is LOCKED
-- [ ] Test: `PayrollService.lock()` — throws if period not yet run
-- [ ] Test: `PayrollService.lock()` — succeeds and sets lockedAt
-- [ ] Integration test: run payroll for 10 test employees, verify payslip records created with correct net pay
+- [x] Test: `PayrollService.run()` — processes correct number of employees
+- [x] Test: `PayrollService.run()` — throws if period is LOCKED
+- [x] Test: `PayrollService.lock()` — throws if period not yet run
+- [x] Test: `PayrollService.lock()` — succeeds and sets lockedAt
+- [x] Integration test: run payroll for 10 test employees, verify payslip records created with correct net pay
 
 ---
 
