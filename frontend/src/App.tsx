@@ -48,6 +48,7 @@ export const App: React.FC = () => {
                 <Route path="/employees/new" element={<EmployeeFormPage />} />
                 <Route path="/employees/:id" element={<EmployeeDetailPage />} />
                 <Route path="/employees/:id/edit" element={<EmployeeFormPage />} />
+                <Route path="/employees/:id/revise-salary" element={<SalaryRevisionPage />} />
                 <Route path="/salary-revision/:employeeId" element={<SalaryRevisionPage />} />
                 <Route path="/payroll" element={<PayrollListPage />} />
                 <Route path="/payroll/:periodId" element={<PayrollDetailPage />} />

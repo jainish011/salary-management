@@ -430,46 +430,46 @@
 ## Phase 12 — Frontend: Employees Pages
 
 ### 12.1 Employee List Page
-- [ ] Create `api/employees.ts` — all employee API calls
-- [ ] Build `EmployeeListPage`:
-  - [ ] Search input with 300ms debounce (updates URL query params)
-  - [ ] Filter bar: Department dropdown, City input, Grade select, Status select, CTC range inputs
-  - [ ] "Clear Filters" button resets all filters
-  - [ ] `DataTable` with columns: Emp Code, Name, Department, Grade, City, Monthly CTC, Status, Actions
-  - [ ] Row click navigates to `/employees/:id`
-  - [ ] Column sorting on Name, Grade, Monthly CTC
-  - [ ] Server-side pagination (20 per page)
-  - [ ] "+ Add Employee" button → `/employees/new`
-  - [ ] All filter state synced to URL query params (shareable links)
+- [x] Create `api/employees.ts` — all employee API calls
+- [x] Build `EmployeeListPage`:
+  - [x] Search input with 300ms debounce (updates URL query params)
+  - [x] Filter bar: Department dropdown, City input, Grade select, Status select, CTC range inputs
+  - [x] "Clear Filters" button resets all filters
+  - [x] `DataTable` with columns: Emp Code, Name, Department, Grade, City, Monthly CTC, Status, Actions
+  - [x] Row click navigates to `/employees/:id`
+  - [x] Column sorting on Name, Grade, Monthly CTC
+  - [x] Server-side pagination (20 per page)
+  - [x] "+ Add Employee" button → `/employees/new`
+  - [x] All filter state synced to URL query params (shareable links)
 
 ### 12.2 Employee Detail Page
-- [ ] Build `EmployeeDetailPage`:
-  - [ ] Profile card: all personal + employment fields
-  - [ ] Current Salary card: monthly CTC breakdown (Basic, HRA, LTA, Special Allow, Employer PF, Gratuity)
-  - [ ] Current Month Estimate card: Gross, deductions, Net Take-Home (computed client-side from current salary)
-  - [ ] Salary History table: all revisions with effective dates, CTC, reason, % change
-  - [ ] "+ Revise Salary" button → `/salary-revision/:id`
-  - [ ] Payslip history: last 6 payslips as cards with period, net pay, link to full payslip
-  - [ ] Edit and soft-delete (terminate) actions in header
+- [x] Build `EmployeeDetailPage`:
+  - [x] Profile card: all personal + employment fields
+  - [x] Current Salary card: monthly CTC breakdown (Basic, HRA, LTA, Special Allow, Employer PF, Gratuity)
+  - [x] Current Month Estimate card: Gross, deductions, Net Take-Home (computed client-side from current salary)
+  - [x] Salary History table: all revisions with effective dates, CTC, reason, % change
+  - [x] "+ Revise Salary" button → `/salary-revision/:id`
+  - [x] Payslip history: last 6 payslips as cards with period, net pay, link to full payslip
+  - [x] Edit and soft-delete (terminate) actions in header
 
 ### 12.3 Employee Form Page (Add / Edit)
-- [ ] Build `EmployeeFormPage` (shared for create and edit):
-  - [ ] Section 1 — Personal Info: firstName, lastName, email, dateOfBirth, gender, panNumber
-  - [ ] Section 2 — Employment Info: dateOfJoining, department (dropdown), designation, grade (select), employmentType (select), workCity (select), workState (auto-fills from city map)
-  - [ ] Section 3 — Salary Info: annualCtc input → live-preview of Basic, HRA, Special Allow, Employer PF, Gratuity breakdown
-  - [ ] Section 4 — Tax Info: taxRegime (select), uanNumber
-  - [ ] Form validation with Zod schema
-  - [ ] On success: navigate to employee detail page
-  - [ ] On edit: pre-fill form with existing data
+- [x] Build `EmployeeFormPage` (shared for create and edit):
+  - [x] Section 1 — Personal Info: firstName, lastName, email, dateOfBirth, gender, panNumber
+  - [x] Section 2 — Employment Info: dateOfJoining, department (dropdown), designation, grade (select), employmentType (select), workCity (select), workState (auto-fills from city map)
+  - [x] Section 3 — Salary Info: annualCtc input → live-preview of Basic, HRA, Special Allow, Employer PF, Gratuity breakdown
+  - [x] Section 4 — Tax Info: taxRegime (select), uanNumber
+  - [x] Form validation with schema
+  - [x] On success: navigate to employee detail page
+  - [x] On edit: pre-fill form with existing data
 
 ### 12.4 Salary Revision Page
-- [ ] Build `SalaryRevisionPage`:
-  - [ ] Show current CTC + Basic for context
-  - [ ] New Annual CTC input → live-preview new breakdown
-  - [ ] Effective From date picker
-  - [ ] Revision Reason select (PROMOTION, APPRAISAL, CORRECTION, MARKET_CORRECTION)
-  - [ ] Remarks textarea
-  - [ ] On success: navigate back to employee detail
+- [x] Build `SalaryRevisionPage`:
+  - [x] Show current CTC + Basic for context
+  - [x] New Annual CTC input → live-preview new breakdown
+  - [x] Effective From date picker
+  - [x] Revision Reason select (PROMOTION, APPRAISAL, CORRECTION, MARKET_CORRECTION)
+  - [x] Remarks textarea
+  - [x] On success: navigate back to employee detail
 
 ---
 
