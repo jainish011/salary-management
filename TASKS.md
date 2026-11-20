@@ -304,40 +304,40 @@
 ## Phase 7 — Backend: Reports Module
 
 ### 7.1 Analytics Endpoints
-- [ ] Create `ReportsModule`, `ReportsController`, `ReportsService`
-- [ ] Implement `GET /reports/dashboard` (cached 10 min):
+- [x] Create `ReportsModule`, `ReportsController`, `ReportsService`
+- [x] Implement `GET /reports/dashboard` (cached 10 min):
   - `totalActiveEmployees` — COUNT WHERE status = ACTIVE
   - `totalMonthlyPayroll` — SUM of net_pay from latest LOCKED period
   - `currentPeriod` — latest payroll period name + status
   - `recentRevisions` — last 5 salary revision events from audit_logs
-- [ ] Implement `GET /reports/department-summary` (cached 15 min):
+- [x] Implement `GET /reports/department-summary` (cached 15 min):
   - Per department: headcount, avgMonthlyCTC, totalMonthlyCTC
   - JOIN employees + salary_structures WHERE effectiveTo IS NULL
   - GROUP BY department
-- [ ] Implement `GET /reports/salary-distribution` (cached 15 min):
+- [x] Implement `GET /reports/salary-distribution` (cached 15 min):
   - Histogram of employees by annual CTC band: <3L, 3–6L, 6–10L, 10–15L, 15–25L, 25L+
   - Return band label + count
-- [ ] Implement `GET /reports/payroll-trend?months=6`:
+- [x] Implement `GET /reports/payroll-trend?months=6`:
   - Last N locked payroll periods
   - Return array of `{ periodName, totalNet, totalGross, month, year }`
-- [ ] Implement `GET /reports/grade-summary` (cached 15 min):
+- [x] Implement `GET /reports/grade-summary` (cached 15 min):
   - Per grade: count, minCTC, avgCTC, maxCTC
-- [ ] Implement `GET /reports/headcount-by-city`:
+- [x] Implement `GET /reports/headcount-by-city`:
   - GROUP BY workCity for ACTIVE employees only
   - Return `{ city, count }`[]
-- [ ] Implement `GET /reports/export?format=csv` — stream CSV of active employees + current salary
+- [x] Implement `GET /reports/export?format=csv` — stream CSV of active employees + current salary
 
 ### 7.2 Audit Logs Endpoint
-- [ ] Create `AuditModule`, `AuditController`
-- [ ] Implement `GET /audit-logs` with pagination + filters:
+- [x] Create `AuditModule`, `AuditController`
+- [x] Implement `GET /audit-logs` with pagination + filters:
   - `entityType`, `entityId`, `changedBy`, `from` (date), `to` (date)
   - Return paginated list with standard meta
 
 ### 7.3 Audit Interceptor
-- [ ] Create `AuditInterceptor` as a NestJS `NestInterceptor`
-- [ ] Implement `@AuditLog(entityType, action)` decorator
-- [ ] Interceptor captures: before/after state from service, userId from JWT, IP from request
-- [ ] Apply decorator to: employee create/update/delete, salary revision, payroll run, period lock
+- [x] Create `AuditInterceptor` as a NestJS `NestInterceptor`
+- [x] Implement `@AuditLog(entityType, action)` decorator
+- [x] Interceptor captures: before/after state from service, userId from JWT, IP from request
+- [x] Apply decorator to: employee create/update/delete, salary revision, payroll run, period lock
 
 ---
 
