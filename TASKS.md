@@ -359,11 +359,11 @@
 ## Phase 9 — Frontend: Foundation & Layout
 
 ### 9.1 App Shell
-- [ ] Create `AppLayout` component: collapsible sidebar + top bar
-- [ ] Sidebar links: Dashboard, Employees, Payroll, Reports, Departments, Audit Logs
-- [ ] Top bar: app name, logged-in user display, logout button
-- [ ] Create `AuthLayout` for the login page (no sidebar)
-- [ ] Set up React Router routes:
+- [x] Create `AppLayout` component: collapsible sidebar + top bar
+- [x] Sidebar links: Dashboard, Employees, Payroll, Reports, Departments, Audit Logs
+- [x] Top bar: app name, logged-in user display, logout button
+- [x] Create `AuthLayout` for the login page (no sidebar)
+- [x] Set up React Router routes:
   - `/login` → LoginPage
   - `/` → redirect to `/dashboard`
   - `/dashboard` → DashboardPage (protected)
@@ -380,35 +380,35 @@
   - `/audit-logs` → AuditLogsPage (protected)
 
 ### 9.2 Auth & API Client
-- [ ] Create `api/client.ts` — Axios instance with base URL, JWT auth header interceptor
-- [ ] Create `api/auth.ts` — login, logout, getMe API calls
-- [ ] Create `AuthContext` with `user`, `login()`, `logout()` methods
-- [ ] Create `ProtectedRoute` component — redirects to `/login` if not authenticated
-- [ ] Store JWT token in memory (not localStorage for security)
-- [ ] Implement global error interceptor: 401 → redirect to login
+- [x] Create `api/client.ts` — Axios instance with base URL, JWT auth header interceptor
+- [x] Create `api/auth.ts` — login, logout, getMe API calls
+- [x] Create `AuthContext` with `user`, `login()`, `logout()` methods
+- [x] Create `ProtectedRoute` component — redirects to `/login` if not authenticated
+- [x] Store JWT token in memory (not localStorage for security)
+- [x] Implement global error interceptor: 401 → redirect to login
 
 ### 9.3 Shared Components
-- [ ] Create `PageHeader` component (title + optional action button)
-- [ ] Create `DataTable` component wrapping TanStack Table with:
+- [x] Create `PageHeader` component (title + optional action button)
+- [x] Create `DataTable` component wrapping TanStack Table with:
   - Server-side pagination controls (Prev/Next, page numbers, total count)
   - Column sorting
   - Loading skeleton state
   - Empty state
-- [ ] Create `StatusBadge` component (Active/On Leave/Terminated with colors)
-- [ ] Create `InrAmount` component (formats number as ₹1,20,000)
-- [ ] Create `ConfirmDialog` component (shadcn AlertDialog wrapper)
-- [ ] Create `LoadingSpinner` component
-- [ ] Create `ErrorMessage` component
+- [x] Create `StatusBadge` component (Active/On Leave/Terminated with colors)
+- [x] Create `InrAmount` component (formats number as ₹1,20,000)
+- [x] Create `ConfirmDialog` component (shadcn AlertDialog wrapper)
+- [x] Create `LoadingSpinner` component
+- [x] Create `ErrorMessage` component
 
 ---
 
 ## Phase 10 — Frontend: Login Page
 
-- [ ] Build `LoginPage` with ACME Payroll branding
-- [ ] Form: email + password inputs with validation (react-hook-form + zod)
-- [ ] Show error message on invalid credentials
-- [ ] On success: store token, redirect to `/dashboard`
-- [ ] Show loading state on submit button
+- [x] Build `LoginPage` with ACME Payroll branding
+- [x] Form: email + password inputs with validation (react-hook-form + zod)
+- [x] Show error message on invalid credentials
+- [x] On success: store token, redirect to `/dashboard`
+- [x] Show loading state on submit button
 
 ---
 
