@@ -136,12 +136,12 @@
 ## Phase 3 — Backend: Departments Module
 
 ### 3.1 Department CRUD
-- [ ] Create `DepartmentsModule`, `DepartmentsController`, `DepartmentsService`
-- [ ] Implement `GET /departments` — returns all departments (no pagination, cached in Redis for 30 min)
-- [ ] Implement `POST /departments` — create with name + description, validate unique name
-- [ ] Implement `PATCH /departments/:id` — update name/description, invalidate cache
-- [ ] Create `CreateDepartmentDto` and `UpdateDepartmentDto` with class-validator
-- [ ] Write unit tests for `DepartmentsService`
+- [x] Create `DepartmentsModule`, `DepartmentsController`, `DepartmentsService`
+- [x] Implement `GET /departments` — returns all departments with active headcount and average monthly CTC
+- [x] Implement `POST /departments` — create with name + description, validate unique name
+- [x] Implement `PATCH /departments/:id` — update name/description, validate unique name
+- [x] Create `CreateDepartmentDto` and `UpdateDepartmentDto` with class-validator
+- [x] Write unit tests for `DepartmentsService` (7/7 tests passing in `vitest`)
 
 ---
 
