@@ -511,32 +511,32 @@
 
 ## Phase 14 — Frontend: Reports Page
 
-- [ ] Build `ReportsPage`:
-  - [ ] Salary By Department — Recharts `BarChart` (dept vs avg CTC)
-  - [ ] Salary Distribution — Recharts `BarChart` (CTC band histogram)
-  - [ ] Payroll Trend — Recharts `LineChart` (last 6 months total net pay)
-  - [ ] Headcount by City — Recharts `BarChart` (horizontal)
-  - [ ] Grade Summary — DataTable (grade, count, min/avg/max CTC)
-  - [ ] Export CSV button (calls `/reports/export` and triggers download)
-  - [ ] Filters: Period (for trend), Department, City
+- [x] Build `ReportsPage`:
+  - [x] Salary By Department — Recharts `BarChart` (dept vs avg CTC)
+  - [x] Salary Distribution — Recharts `BarChart` (CTC band histogram)
+  - [x] Payroll Trend — Recharts `LineChart` (last 6 months total net pay)
+  - [x] Headcount by City — Recharts `BarChart` (horizontal)
+  - [x] Grade Summary — DataTable (grade, count, min/avg/max CTC)
+  - [x] Export CSV button (calls `/reports/export` and triggers download)
+  - [x] Filters: Period (for trend), Department, City
 
 ---
 
 ## Phase 15 — Frontend: Departments & Audit Logs Pages
 
 ### 15.1 Departments Page
-- [ ] Build `DepartmentsPage`:
-  - [ ] Table: Department Name, Headcount, Avg Monthly CTC, Actions (Edit)
-  - [ ] "+ Add Department" button → inline form or dialog
-  - [ ] Edit department name/description in dialog
-  - [ ] No pagination (< 100 items)
+- [x] Build `DepartmentsPage`:
+  - [x] Table: Department Name, Headcount, Avg Monthly CTC, Actions (Edit)
+  - [x] "+ Add Department" button → inline form or dialog
+  - [x] Edit department name/description in dialog
+  - [x] No pagination (< 100 items)
 
 ### 15.2 Audit Logs Page
-- [ ] Build `AuditLogsPage`:
-  - [ ] Filters: Entity Type select, From date, To date, Changed By input
-  - [ ] Table: Timestamp, Action (human-readable), Changed By, Entity (clickable link to employee/period)
-  - [ ] Server-side pagination (20 per page)
-  - [ ] Read-only — no edit actions
+- [x] Build `AuditLogsPage`:
+  - [x] Filters: Entity Type select, From date, To date, Changed By input
+  - [x] Table: Timestamp, Action (human-readable), Changed By, Entity (clickable link to employee/period)
+  - [x] Server-side pagination (20 per page)
+  - [x] Read-only — no edit actions
 
 ---
 
