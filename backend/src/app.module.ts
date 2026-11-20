@@ -4,6 +4,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import {
+  User,
+  Department,
+  Employee,
+  SalaryStructure,
+  PayrollPeriod,
+  Payslip,
+  PayslipItem,
+  AuditLog,
+} from './entities/index.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -23,8 +33,18 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         username: configService.get<string>('DB_USER', 'postgres'),
         password: configService.get<string>('DB_PASSWORD', 'jainish'),
         database: configService.get<string>('DB_NAME', 'acme_salary'),
+        entities: [
+          User,
+          Department,
+          Employee,
+          SalaryStructure,
+          PayrollPeriod,
+          Payslip,
+          PayslipItem,
+          AuditLog,
+        ],
         autoLoadEntities: true,
-        synchronize: true, // For development; entities will sync directly
+        synchronize: true, // Will automatically generate/sync tables on startup
         extra: {
           max: 20,
           min: 5,

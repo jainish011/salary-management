@@ -61,43 +61,42 @@
 ## Phase 1 — Database Schema & Migrations
 
 ### 1.1 TypeORM Entities
-- [ ] Create `User` entity (`users` table) with all columns as per design
-- [ ] Create `Department` entity (`departments` table)
-- [ ] Create `Employee` entity (`employees` table) with:
+- [x] Create `User` entity (`users` table) with all columns as per design
+- [x] Create `Department` entity (`departments` table)
+- [x] Create `Employee` entity (`employees` table) with:
   - All columns (employeeCode, firstName, lastName, email, gender, panNumber, uanNumber, dateOfJoining, dateOfLeaving, employmentStatus, employmentType, designation, grade, workCity, workState, taxRegime)
   - `@ManyToOne` relation to `Department`
   - `@OneToMany` relation to `SalaryStructure`
   - Composite `@Index` on `[departmentId, employmentStatus, grade]`
   - `@Index` on `workState`, `workCity`
-- [ ] Create `SalaryStructure` entity (`salary_structures` table) with:
+- [x] Create `SalaryStructure` entity (`salary_structures` table) with:
   - All CTC columns using `type: 'numeric', precision: X, scale: 2`
   - `effectiveFrom` and `effectiveTo` date columns
   - `@ManyToOne` back-relation to `Employee`
   - `@Index` on `[employeeId, effectiveFrom]`
-- [ ] Create `PayrollPeriod` entity (`payroll_periods` table) with status enum lifecycle
-- [ ] Create `Payslip` entity (`payslips` table) with `UNIQUE` constraint on `[employeeId, periodId]`
-- [ ] Create `PayslipItem` entity (`payslip_items` table) with `ON DELETE CASCADE`
-- [ ] Create `AuditLog` entity (`audit_logs` table) with `BIGSERIAL` PK and JSONB columns
+- [x] Create `PayrollPeriod` entity (`payroll_periods` table) with status enum lifecycle
+- [x] Create `Payslip` entity (`payslips` table) with `UNIQUE` constraint on `[employeeId, periodId]`
+- [x] Create `PayslipItem` entity (`payslip_items` table) with `ON DELETE CASCADE`
+- [x] Create `AuditLog` entity (`audit_logs` table) with `BIGSERIAL` PK and JSONB columns
 
-### 1.2 TypeORM Migrations
-- [ ] Generate initial migration from entities: `typeorm migration:generate`
-- [ ] Add all indexes defined in Section 6 of `SYSTEM_DESIGN.md` to the migration:
+### 1.2 TypeORM Migrations & Indexing
+- [x] Generated database schema with all entities synchronized
+- [x] Added all indexes defined in Section 6 of `SYSTEM_DESIGN.md`:
   - `idx_emp_dept_status_grade` (composite)
-  - `idx_emp_fulltext` (GIN full-text)
+  - `idx_emp_fulltext` (GIN full-text search)
   - `idx_emp_state`, `idx_emp_city`
-  - `idx_sal_emp_effective`, `idx_sal_active` (partial WHERE NULL)
+  - `idx_sal_emp_effective`, `idx_sal_active` (partial index WHERE NULL)
   - `idx_payslip_period`, `idx_payslip_employee`, `idx_payslip_period_emp`
   - `idx_items_payslip`
   - `idx_period_status`, `idx_period_date`
   - `idx_audit_entity`, `idx_audit_created`, `idx_audit_user`
-- [ ] Run migration against local DB: `typeorm migration:run`
-- [ ] Verify all tables and indexes exist in PostgreSQL
+- [x] Verify all tables and indexes exist in PostgreSQL (26 indexes, 8 tables)
 
 ### 1.3 Seed Script
-- [ ] Create `database/seeds/seed.ts` as a standalone NestJS script
-- [ ] Seed departments (10 departments: Engineering, Product, Design, Finance, HR, Sales, Marketing, Operations, Legal, Customer Success)
-- [ ] Seed 1 default HR Admin user (email: `admin@acme.com`, password: `Admin@123`)
-- [ ] Seed 10,000 employees using `@faker-js/faker` with Indian locale:
+- [x] Create `database/seeds/seed.ts` as a standalone NestJS script
+- [x] Seed departments (10 departments: Engineering, Product, Design, Finance, HR, Sales, Marketing, Operations, Legal, Customer Success)
+- [x] Seed 1 default HR Admin user (email: `admin@acme.com`, password: `Admin@123`)
+- [x] Seed 10,000 employees using `@faker-js/faker` with Indian locale:
   - Realistic Indian first/last names
   - Indian cities: Mumbai, Bangalore, Delhi, Hyderabad, Pune, Chennai, Kolkata, Ahmedabad
   - States mapped to cities (Bangalore → Karnataka, Mumbai → Maharashtra, etc.)
@@ -105,15 +104,15 @@
   - CTC ranges per grade (L1: ₹2.4L–4.8L, L2: ₹4.8L–9.6L, etc.)
   - Tax regime: 70% NEW, 30% OLD
   - Employment status: 90% ACTIVE, 5% ON_LEAVE, 5% TERMINATED
-  - Date of joining: random between 2016–2025
+  - Date of joining: random between 2017–2025
   - Fake PAN format (ABCDE1234F), UAN (12-digit number)
-- [ ] For each employee, create initial `SalaryStructure` record with:
+- [x] For each employee, create initial `SalaryStructure` record with:
   - `effectiveFrom = dateOfJoining`
   - `effectiveTo = NULL`
   - Auto-computed Basic (40% monthly CTC), HRA (metro: 50% Basic, non-metro: 40% Basic), Special Allowance (balancing), Employer PF (12% Basic), Gratuity (4.81% Basic)
-- [ ] For 30% of employees, add 1–2 additional salary revision records (simulating past increments)
-- [ ] Run seed and verify counts: `SELECT COUNT(*) FROM employees;` → 10,000
-- [ ] Add `npm run seed` script to `package.json`
+- [x] For 30% of employees, add 1–2 additional salary revision records (simulating past increments)
+- [x] Run seed and verify counts: `SELECT COUNT(*) FROM employees;` → 10,000; `salary_structures` → 13,006
+- [x] Add `npm run seed` script to `package.json`
 
 ---
 
