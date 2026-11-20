@@ -207,26 +207,26 @@
 ## Phase 5 — Backend: Payroll Calculation Engine
 
 ### 5.1 Core Calculation Engine
-- [ ] Create `PayrollCalculationService` as a standalone injectable service
-- [ ] Implement `calculateProfessionalTax(state, gender, grossMonthly, month)`:
+- [x] Create `PayrollCalculationService` as a standalone injectable service
+- [x] Implement `calculateProfessionalTax(state, gender, grossMonthly, month)`:
   - Maharashtra slabs (male/female distinction, February ₹300)
   - Karnataka slabs (February ₹300)
   - Tamil Nadu slabs
   - Delhi, Haryana, UP → ₹0
   - Default fallback
-- [ ] Implement `calculateTaxNewRegime(annualCtc)`:
+- [x] Implement `calculateTaxNewRegime(annualCtc)`:
   - Standard deduction ₹75,000
   - Slab rates: 0% / 5% / 10% / 15% / 20% / 30%
   - Section 87A rebate (zero tax if taxable ≤ ₹7L)
   - 4% Health & Education Cess
-- [ ] Implement `calculateTaxOldRegime(annualCtc, basicMonthly, hraMonthly, workCity)`:
+- [x] Implement `calculateTaxOldRegime(annualCtc, basicMonthly, hraMonthly, workCity)`:
   - Standard deduction ₹50,000
   - HRA exemption: `min(actualHRA, rent paid - 10% basic, 50%/40% of basic)`
   - 80C deduction assumption: ₹1,50,000
   - Slab rates: 0% / 5% / 20% / 30%
   - Section 87A rebate (zero tax if taxable ≤ ₹5L)
   - 4% cess
-- [ ] Implement `calculateForEmployee(employee, salaryStructure, payrollPeriod)`:
+- [x] Implement `calculateForEmployee(employee, salaryStructure, payrollPeriod)`:
   - Gross = Basic + HRA + LTA + Special Allow
   - Employee PF = 12% of min(Basic, ₹15,000)
   - Employer PF = same as employee PF
@@ -237,22 +237,22 @@
   - Gratuity provision = Basic × 0.0481
   - Net Pay = Gross − (Employee PF + ESI + PT + TDS)
   - Return full `PayslipCalculationResult` with itemized line items
-- [ ] Implement `buildLineItems(result)` — creates ordered `PayslipItem[]` with sort_order
+- [x] Implement `buildLineItems(result)` — creates ordered `PayslipItem[]` with sort_order
 
 ### 5.2 Payroll Calculation Unit Tests (Critical)
-- [ ] Test: PT = ₹0 for employee in Delhi (any salary)
-- [ ] Test: PT = ₹200 for Karnataka employee earning ₹30,000 in March
-- [ ] Test: PT = ₹300 for Karnataka employee earning ₹30,000 in February
-- [ ] Test: PT = ₹0 for Maharashtra female employee earning ₹20,000
-- [ ] Test: PT = ₹175 for Maharashtra male employee earning ₹9,000
-- [ ] Test: TDS = ₹0 for New Regime employee with annual CTC ₹7,00,000 (87A rebate applies)
-- [ ] Test: TDS correct for New Regime employee with annual CTC ₹10,00,000
-- [ ] Test: TDS correct for Old Regime employee with annual CTC ₹10,00,000
-- [ ] Test: ESI deducted for employee with Gross ₹18,000
-- [ ] Test: ESI = ₹0 for employee with Gross ₹25,000
-- [ ] Test: PF capped at ₹15,000 Basic wage ceiling
-- [ ] Test: Net Pay = Gross − all deductions (end-to-end calculation)
-- [ ] Test: Payslip line items count and sort order correct
+- [x] Test: PT = ₹0 for employee in Delhi (any salary)
+- [x] Test: PT = ₹200 for Karnataka employee earning ₹30,000 in March
+- [x] Test: PT = ₹300 for Karnataka employee earning ₹30,000 in February
+- [x] Test: PT = ₹0 for Maharashtra female employee earning ₹20,000
+- [x] Test: PT = ₹175 for Maharashtra male employee earning ₹9,000
+- [x] Test: TDS = ₹0 for New Regime employee with annual CTC ₹7,00,000 (87A rebate applies)
+- [x] Test: TDS correct for New Regime employee with annual CTC ₹10,00,000
+- [x] Test: TDS correct for Old Regime employee with annual CTC ₹10,00,000
+- [x] Test: ESI deducted for employee with Gross ₹18,000
+- [x] Test: ESI = ₹0 for employee with Gross ₹25,000
+- [x] Test: PF capped at ₹15,000 Basic wage ceiling
+- [x] Test: Net Pay = Gross − all deductions (end-to-end calculation)
+- [x] Test: Payslip line items count and sort order correct
 
 ---
 

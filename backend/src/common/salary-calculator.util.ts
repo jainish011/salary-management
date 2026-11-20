@@ -1,5 +1,6 @@
 export const METRO_CITIES = new Set([
   'BANGALORE',
+  'BENGALURU',
   'MUMBAI',
   'DELHI',
   'HYDERABAD',
