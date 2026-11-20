@@ -344,15 +344,15 @@
 ## Phase 8 — Backend: Caching Layer
 
 ### 8.1 Redis Cache Setup
-- [ ] Configure Redis connection in `app.module.ts` using `cache-manager` with ioredis store
-- [ ] Create `CacheService` wrapper with typed `get`, `set`, `del`, `delPattern` methods
-- [ ] Implement cache read-through pattern in `ReportsService` and `DepartmentsService`
-- [ ] Implement cache invalidation calls in:
+- [x] Configure Redis connection in `app.module.ts` using `cache-manager` with ioredis store
+- [x] Create `CacheService` wrapper with typed `get`, `set`, `del`, `delPattern` methods
+- [x] Implement cache read-through pattern in `ReportsService` and `DepartmentsService`
+- [x] Implement cache invalidation calls in:
   - `EmployeesService.create()` → delete `dashboard:kpis`
   - `SalaryStructuresService.createRevision()` → delete `dashboard:kpis`, `reports:*`
   - `DepartmentsService.create/update()` → delete `departments:all`
   - `PayrollService.run()` → delete `dashboard:kpis`, `reports:*`
-- [ ] Verify cache is working with Redis CLI (`KEYS *` after first request)
+- [x] Verify cache is working with Redis CLI (`KEYS *` after first request)
 
 ---
 

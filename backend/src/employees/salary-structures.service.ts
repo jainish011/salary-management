@@ -10,6 +10,7 @@ import { SalaryStructure } from '../entities/salary-structure.entity.js';
 import { AuditLog, AuditAction } from '../entities/audit-log.entity.js';
 import { CreateSalaryRevisionDto } from './dto/create-salary-revision.dto.js';
 import { calculateSalaryBreakup } from '../common/salary-calculator.util.js';
+import { CacheService } from '../common/cache.service.js';
 
 @Injectable()
 export class SalaryStructuresService {
@@ -21,6 +22,7 @@ export class SalaryStructuresService {
     @InjectRepository(AuditLog)
     private readonly auditRepository: Repository<AuditLog>,
     private readonly dataSource: DataSource,
+    private readonly cacheService?: CacheService,
   ) {}
 
   async createRevision(
@@ -107,6 +109,10 @@ export class SalaryStructuresService {
       await queryRunner.manager.save(audit);
 
       await queryRunner.commitTransaction();
+
+      if (this.cacheService) {
+        await this.cacheService.delPattern('reports:*');
+      }
 
       return savedNewStructure;
     } catch (err) {

@@ -9,6 +9,7 @@ import {
   PayrollPeriodStatus,
 } from '../entities/payroll-period.entity.js';
 import { AuditLog } from '../entities/audit-log.entity.js';
+import { CacheService } from '../common/cache.service.js';
 
 @Injectable()
 export class ReportsService {
@@ -23,9 +24,16 @@ export class ReportsService {
     private readonly periodRepository: Repository<PayrollPeriod>,
     @InjectRepository(AuditLog)
     private readonly auditRepository: Repository<AuditLog>,
+    private readonly cacheService?: CacheService,
   ) {}
 
   async getDashboard() {
+    const cacheKey = 'reports:dashboard';
+    if (this.cacheService) {
+      const cached = await this.cacheService.get<any>(cacheKey);
+      if (cached) return cached;
+    }
+
     const totalActiveEmployees = await this.employeeRepository.count({
       where: { employmentStatus: EmploymentStatus.ACTIVE },
     });
@@ -47,7 +55,7 @@ export class ReportsService {
       relations: { changer: true },
     });
 
-    return {
+    const result = {
       totalActiveEmployees,
       totalMonthlyPayroll: latestLockedPeriod ? Number(latestLockedPeriod.totalNet) : 0,
       currentPeriod: latestPeriod
@@ -67,9 +75,21 @@ export class ReportsService {
         createdAt: rev.createdAt,
       })),
     };
+
+    if (this.cacheService) {
+      await this.cacheService.set(cacheKey, result, 600); // 10 min
+    }
+
+    return result;
   }
 
   async getDepartmentSummary() {
+    const cacheKey = 'reports:department-summary';
+    if (this.cacheService) {
+      const cached = await this.cacheService.get<any>(cacheKey);
+      if (cached) return cached;
+    }
+
     const raw = await this.departmentRepository
       .createQueryBuilder('dept')
       .leftJoin(
@@ -93,13 +113,19 @@ export class ReportsService {
       .orderBy('headcount', 'DESC')
       .getRawMany();
 
-    return raw.map((r) => ({
+    const result = raw.map((r) => ({
       departmentId: r.departmentId,
       departmentName: r.departmentName,
       headcount: parseInt(r.headcount, 10),
       avgMonthlyCtc: parseFloat(r.avgMonthlyCtc),
       totalMonthlyCtc: parseFloat(r.totalMonthlyCtc),
     }));
+
+    if (this.cacheService) {
+      await this.cacheService.set(cacheKey, result, 900); // 15 min
+    }
+
+    return result;
   }
 
   async getSalaryDistribution() {

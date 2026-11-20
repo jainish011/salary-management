@@ -20,6 +20,7 @@ import { PayrollCalculationService } from './payroll-calculation.service.js';
 import { CreatePayrollPeriodDto } from './dto/create-payroll-period.dto.js';
 import { PeriodPayslipsQueryDto } from './dto/period-payslips-query.dto.js';
 import { PaginatedResponse } from '../common/pagination.dto.js';
+import { CacheService } from '../common/cache.service.js';
 
 const MONTH_NAMES = [
   'January',
@@ -53,6 +54,7 @@ export class PayrollService {
     private readonly auditRepository: Repository<AuditLog>,
     private readonly calculationService: PayrollCalculationService,
     private readonly dataSource: DataSource,
+    private readonly cacheService?: CacheService,
   ) {}
 
   async findAll(page = 1, limit = 20): Promise<PaginatedResponse<PayrollPeriod>> {
@@ -280,6 +282,10 @@ export class PayrollService {
       );
 
       await queryRunner.commitTransaction();
+
+      if (this.cacheService) {
+        await this.cacheService.delPattern('reports:*');
+      }
 
       const durationMs = Date.now() - startTime;
       return {
