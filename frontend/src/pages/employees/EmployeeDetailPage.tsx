@@ -130,7 +130,7 @@ export const EmployeeDetailPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <Link
             to={`/employees/${employee.id}/edit`}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg shadow-xs hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg shadow-xs hover:bg-slate-50 transition-colors"
           >
             <Edit className="w-4 h-4 text-slate-500" />
             Edit Profile
@@ -138,7 +138,7 @@ export const EmployeeDetailPage: React.FC = () => {
 
           <Link
             to={`/salary-revision/${employee.id}`}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors"
           >
             <TrendingUp className="w-4 h-4" />
             Revise Salary
@@ -147,7 +147,7 @@ export const EmployeeDetailPage: React.FC = () => {
           {employee.employmentStatus !== 'TERMINATED' && (
             <button
               onClick={() => setShowTerminateModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg shadow-xs hover:bg-rose-100 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg shadow-xs hover:bg-rose-100 transition-colors"
             >
               <UserX className="w-4 h-4" />
               Terminate
@@ -156,68 +156,63 @@ export const EmployeeDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Hero Banner Profile Header */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="h-20 bg-gradient-to-r from-indigo-700 via-indigo-800 to-slate-900" />
-        <div className="px-6 pb-6 pt-0 relative">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-10 sm:-mt-12">
-            <div className="flex items-end gap-4">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white p-1.5 shadow-md border border-slate-100 flex-shrink-0">
-                <div className="w-full h-full rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-2xl">
-                  {employee.firstName[0]}
-                  {employee.lastName[0]}
+      {/* Unified Profile Header Card */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center font-bold text-2xl text-indigo-700 shrink-0 shadow-xs">
+              {employee.firstName[0]}
+              {employee.lastName[0]}
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-normal">
+                  {employee.firstName} {employee.lastName}
+                </h1>
+                <span className="font-mono text-xs font-semibold px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                  {employee.employeeCode}
+                </span>
+                <StatusBadge status={employee.employmentStatus} />
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                  Grade {employee.grade}
+                </span>
+              </div>
+              <p className="text-sm font-medium text-slate-600 flex items-center gap-2">
+                <span>{employee.designation}</span>
+                <span className="text-slate-300">•</span>
+                <span>{employee.department?.name || 'Department N/A'}</span>
+              </p>
+            </div>
+          </div>
+
+          {currentSal && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-3.5 flex items-center gap-6 shrink-0">
+              <div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Annual CTC
+                </div>
+                <div className="text-lg font-bold text-indigo-900 mt-0.5">
+                  <InrAmount amount={currentSal.annualCtc} />
                 </div>
               </div>
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="text-2xl font-bold text-slate-900">
-                    {employee.firstName} {employee.lastName}
-                  </h1>
-                  <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                    {employee.employeeCode}
-                  </span>
-                  <StatusBadge status={employee.employmentStatus} />
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                    Grade {employee.grade}
-                  </span>
+              <div className="h-8 w-px bg-slate-200" />
+              <div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Monthly Gross
                 </div>
-                <p className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                  <span>{employee.designation}</span>
-                  <span className="text-slate-300">•</span>
-                  <span>{employee.department?.name || 'Department N/A'}</span>
-                </p>
+                <div className="text-lg font-bold text-slate-900 mt-0.5">
+                  <InrAmount
+                    amount={
+                      currentSal.basicMonthly +
+                      currentSal.hraMonthly +
+                      currentSal.ltaMonthly +
+                      currentSal.specialAllowance
+                    }
+                  />
+                </div>
               </div>
             </div>
-
-            {currentSal && (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-6">
-                <div>
-                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Annual CTC
-                  </div>
-                  <div className="text-lg font-bold text-indigo-900">
-                    <InrAmount amount={currentSal.annualCtc} />
-                  </div>
-                </div>
-                <div className="h-8 w-px bg-slate-200" />
-                <div>
-                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Monthly Gross
-                  </div>
-                  <div className="text-lg font-bold text-slate-900">
-                    <InrAmount
-                      amount={
-                        currentSal.basicMonthly +
-                        currentSal.hraMonthly +
-                        currentSal.ltaMonthly +
-                        currentSal.specialAllowance
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
@@ -233,11 +228,11 @@ export const EmployeeDetailPage: React.FC = () => {
             </h2>
 
             <dl className="mt-4 space-y-3.5 text-sm">
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-500 flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <dt className="text-slate-500 flex items-center gap-2 shrink-0">
                   <Mail className="w-3.5 h-3.5 text-slate-400" /> Email
                 </dt>
-                <dd className="font-medium text-slate-900 truncate max-w-[180px]">
+                <dd className="font-medium text-slate-900 break-all sm:text-right select-all">
                   {employee.email}
                 </dd>
               </div>

@@ -91,14 +91,14 @@ export const DashboardPage: React.FC = () => {
       >
         <Link
           to="/employees/new"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-sm shadow-indigo-600/30 transition"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-xs transition-colors"
         >
           <UserPlus className="w-4 h-4" />
           <span>Add Employee</span>
         </Link>
         <Link
           to="/payroll"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-300 shadow-xs transition-colors"
         >
           <PlayCircle className="w-4 h-4 text-indigo-600" />
           <span>Payroll Cycles</span>
@@ -106,7 +106,7 @@ export const DashboardPage: React.FC = () => {
         <a
           href={reportsApi.getExportCsvUrl()}
           download="employees-salary-report.csv"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-xs border border-emerald-200 transition"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-sm border border-emerald-200 shadow-xs transition-colors"
         >
           <Download className="w-4 h-4 text-emerald-600" />
           <span>Export CSV</span>
@@ -224,14 +224,17 @@ export const DashboardPage: React.FC = () => {
                   />
                   <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
                   <Tooltip
-                    formatter={(val: any) => [`${val} Employees`, 'Headcount']}
+                    formatter={(val: any) => [`${Number(val).toLocaleString('en-IN')} Employees`, 'Headcount']}
                     contentStyle={{
-                      backgroundColor: '#1e293b',
+                      backgroundColor: '#ffffff',
                       borderRadius: '8px',
-                      color: '#fff',
+                      border: '1px solid #cbd5e1',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                       fontSize: '12px',
-                      border: 'none',
+                      padding: '8px 12px',
                     }}
+                    labelStyle={{ color: '#475569', fontWeight: 600, marginBottom: '2px' }}
+                    itemStyle={{ color: '#0f172a', fontWeight: 600 }}
                   />
                   <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                     {(salaryDist || []).map((_: any, index: number) => (
@@ -285,12 +288,15 @@ export const DashboardPage: React.FC = () => {
                       'Headcount',
                     ]}
                     contentStyle={{
-                      backgroundColor: '#1e293b',
+                      backgroundColor: '#ffffff',
                       borderRadius: '8px',
-                      color: '#fff',
+                      border: '1px solid #cbd5e1',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                       fontSize: '12px',
-                      border: 'none',
+                      padding: '8px 12px',
                     }}
+                    labelStyle={{ color: '#475569', fontWeight: 600, marginBottom: '2px' }}
+                    itemStyle={{ color: '#0f172a', fontWeight: 600 }}
                   />
                   <Bar dataKey="headcount" fill="#6366f1" radius={[0, 4, 4, 0]} />
                 </BarChart>

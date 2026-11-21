@@ -77,16 +77,16 @@ export const PayslipViewPage: React.FC = () => {
           {emp && (
             <Link
               to={`/employees/${emp.id}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg shadow-xs hover:bg-slate-50 transition-colors"
             >
-              <User className="w-3.5 h-3.5 text-slate-500" />
+              <User className="w-4 h-4 text-slate-500" />
               Employee Profile
             </Link>
           )}
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors"
           >
             <Printer className="w-4 h-4" />
             Print / Save as PDF

@@ -35,7 +35,7 @@ export const AppLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="h-screen w-screen overflow-hidden bg-slate-50 flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -44,14 +44,14 @@ export const AppLayout: React.FC = () => {
         />
       )}
 
-      {/* Sidebar Navigation */}
+      {/* Sidebar Navigation - Fixed Viewport Height */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 h-full bg-slate-900 text-white flex flex-col shrink-0 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
+        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-500/20">
               A
@@ -98,8 +98,8 @@ export const AppLayout: React.FC = () => {
           })}
         </nav>
 
-        {/* User Card & Logout at Bottom */}
-        <div className="p-4 border-t border-slate-800">
+        {/* User Card & Logout at Bottom (Pinned) */}
+        <div className="p-4 border-t border-slate-800 shrink-0">
           <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50 mb-3">
             <div className="w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-xs font-semibold text-indigo-300">
               {user?.fullName?.charAt(0) || 'U'}
@@ -123,7 +123,7 @@ export const AppLayout: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Top Navbar */}
         <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
           <div className="flex items-center gap-3">
@@ -133,11 +133,6 @@ export const AppLayout: React.FC = () => {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                India Entity &bull; 10,000 Employees
-              </span>
-            </div>
           </div>
 
           <div className="flex items-center gap-4">

@@ -149,10 +149,15 @@ export const ReportsPage: React.FC = () => {
                     <Tooltip
                       formatter={(value: any) => [formatINR(Number(value)), 'Avg CTC']}
                       contentStyle={{
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
-                        border: '1px solid #e2e8f0',
+                        border: '1px solid #cbd5e1',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                         fontSize: '12px',
+                        padding: '8px 12px',
                       }}
+                      labelStyle={{ color: '#475569', fontWeight: 600, marginBottom: '2px' }}
+                      itemStyle={{ color: '#0f172a', fontWeight: 600 }}
                     />
                     <Bar dataKey="avgAnnualCtc" fill="#4f46e5" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -191,10 +196,15 @@ export const ReportsPage: React.FC = () => {
                       <Tooltip
                         formatter={(value: any) => [formatINR(Number(value)), 'Total Net Pay']}
                         contentStyle={{
+                          backgroundColor: '#ffffff',
                           borderRadius: '8px',
-                          border: '1px solid #e2e8f0',
+                          border: '1px solid #cbd5e1',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                           fontSize: '12px',
+                          padding: '8px 12px',
                         }}
+                        labelStyle={{ color: '#475569', fontWeight: 600, marginBottom: '2px' }}
+                        itemStyle={{ color: '#0f172a', fontWeight: 600 }}
                       />
                       <Line
                         type="monotone"
@@ -246,10 +256,15 @@ export const ReportsPage: React.FC = () => {
                     <Tooltip
                       formatter={(value: any) => [Number(value).toLocaleString('en-IN'), 'Employees']}
                       contentStyle={{
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
-                        border: '1px solid #e2e8f0',
+                        border: '1px solid #cbd5e1',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                         fontSize: '12px',
+                        padding: '8px 12px',
                       }}
+                      labelStyle={{ color: '#475569', fontWeight: 600, marginBottom: '2px' }}
+                      itemStyle={{ color: '#0f172a', fontWeight: 600 }}
                     />
                     <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -286,10 +301,15 @@ export const ReportsPage: React.FC = () => {
                     <Tooltip
                       formatter={(value: any) => [Number(value).toLocaleString('en-IN'), 'Headcount']}
                       contentStyle={{
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
-                        border: '1px solid #e2e8f0',
+                        border: '1px solid #cbd5e1',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                         fontSize: '12px',
+                        padding: '8px 12px',
                       }}
+                      labelStyle={{ color: '#475569', fontWeight: 600, marginBottom: '2px' }}
+                      itemStyle={{ color: '#0f172a', fontWeight: 600 }}
                     />
                     <Bar dataKey="count" fill="#f59e0b" radius={[0, 4, 4, 0]} />
                   </BarChart>

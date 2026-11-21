@@ -4,6 +4,7 @@ import {
   Building2,
   Edit2,
   Plus,
+  Search,
   TrendingUp,
   Users,
   X,
@@ -20,6 +21,7 @@ export const DepartmentsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Form State
   const [name, setName] = useState('');
@@ -111,6 +113,16 @@ export const DepartmentsPage: React.FC = () => {
   const totalHeadcount = departments.reduce((acc, d) => acc + (d.headcount || 0), 0);
   const totalMonthlyPayroll = departments.reduce((acc, d) => acc + (d.totalMonthlyCtc || 0), 0);
 
+  // Filtered departments by name/description
+  const filteredDepartments = departments.filter((d) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      d.name.toLowerCase().includes(q) ||
+      (d.description && d.description.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -175,6 +187,33 @@ export const DepartmentsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Search & Filter Bar */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Filter departments by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="text-xs text-slate-500 w-full sm:w-auto text-left sm:text-right">
+          Showing <span className="font-bold text-slate-800">{filteredDepartments.length}</span> of{' '}
+          <span className="font-bold text-slate-800">{departments.length}</span> departments
+        </div>
+      </div>
+
       {/* Main Table View */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         {isLoading ? (
@@ -196,9 +235,24 @@ export const DepartmentsPage: React.FC = () => {
               action={
                 <button
                   onClick={openCreateModal}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                  className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-xs"
                 >
                   + Add Department
+                </button>
+              }
+            />
+          </div>
+        ) : filteredDepartments.length === 0 ? (
+          <div className="p-8">
+            <EmptyState
+              title="No Matching Departments"
+              description={`No departments match "${searchQuery}". Try a different keyword.`}
+              action={
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="px-4 py-2 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50"
+                >
+                  Clear Filter
                 </button>
               }
             />
@@ -217,7 +271,7 @@ export const DepartmentsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {departments.map((dept) => (
+                {filteredDepartments.map((dept) => (
                   <tr key={dept.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs">
