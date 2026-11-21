@@ -156,7 +156,7 @@ export const EmployeeFormPage: React.FC = () => {
       errors.workCity = 'Work city is required';
     }
 
-    if (!isEditMode && (!formData.annualCtc || Number(formData.annualCtc) < 100000)) {
+    if (!formData.annualCtc || Number(formData.annualCtc) < 100000) {
       errors.annualCtc = 'Annual CTC must be at least ₹1,00,000';
     }
 
@@ -193,10 +193,26 @@ export const EmployeeFormPage: React.FC = () => {
 
   // Update Mutation
   const updateMutation = useMutation({
-    mutationFn: (data: any) => employeesApi.update(id!, data),
+    mutationFn: async (data: any) => {
+      const updatedEmp = await employeesApi.update(id!, data);
+      const originalCtc = existingEmployee?.currentSalary?.annualCtc;
+      const newCtc = Number(formData.annualCtc);
+      if (newCtc && originalCtc && newCtc !== Number(originalCtc)) {
+        await employeesApi.createSalaryRevision({
+          employeeId: id!,
+          annualCtc: newCtc,
+          effectiveFrom: new Date().toISOString().split('T')[0],
+          revisionReason: 'CORRECTION',
+          remarks: 'Updated via employee profile edit',
+        });
+      }
+      return updatedEmp;
+    },
     onSuccess: (updatedEmp) => {
       queryClient.invalidateQueries({ queryKey: ['employee', id] });
+      queryClient.invalidateQueries({ queryKey: ['salary-history', id] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       navigate(`/employees/${updatedEmp.id}`);
     },
     onError: (err: any) => {
@@ -585,143 +601,125 @@ export const EmployeeFormPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 4: Initial Compensation (Add mode only) */}
-        {!isEditMode ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-indigo-600" />
-                4. Initial Compensation (Annual CTC)
-              </h2>
-              <span className="text-xs text-slate-500">
-                Auto-calculated under Indian Statutory Standards
-              </span>
-            </div>
+        {/* Section 4: Compensation & Salary Breakdown */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-indigo-600" />
+              4. Compensation Structure (Annual CTC)
+            </h2>
+            <span className="text-xs text-slate-500">
+              {isEditMode
+                ? 'Adjusting CTC here updates employee compensation with statutory compliance'
+                : 'Auto-calculated under Indian Statutory Standards'}
+            </span>
+          </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* CTC Input */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Annual CTC (₹) <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold">
-                      ₹
-                    </span>
-                    <input
-                      type="number"
-                      step={50000}
-                      min={100000}
-                      value={formData.annualCtc}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          annualCtc: Number(e.target.value),
-                        }))
-                      }
-                      className={`w-full pl-8 pr-3.5 py-2.5 text-base font-bold text-slate-900 rounded-lg border bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all ${
-                        formErrors.annualCtc ? 'border-rose-400 ring-rose-200' : 'border-slate-300'
-                      }`}
-                    />
-                  </div>
-                  {formErrors.annualCtc && (
-                    <p className="text-xs text-rose-600 mt-1">{formErrors.annualCtc}</p>
-                  )}
-                  <p className="text-xs text-slate-500 mt-1">
-                    Monthly CTC:{' '}
-                    <span className="font-semibold text-slate-700">
-                      <InrAmount amount={salaryBreakup.monthlyCtc} />
-                    </span>
-                  </p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* CTC Input */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Annual CTC (₹) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    step={50000}
+                    min={100000}
+                    value={formData.annualCtc}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        annualCtc: Number(e.target.value),
+                      }))
+                    }
+                    className={`w-full pl-8 pr-3.5 py-2.5 text-base font-bold text-slate-900 rounded-lg border bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all ${
+                      formErrors.annualCtc ? 'border-rose-400 ring-rose-200' : 'border-slate-300'
+                    }`}
+                  />
                 </div>
-
-                {/* Take-Home Highlight Card */}
-                <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-2">
-                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                    Est. In-Hand Monthly Take-Home
-                  </div>
-                  <div className="text-2xl font-bold text-emerald-700">
-                    <InrAmount amount={takeHome.netTakeHomeMonthly} />
-                  </div>
-                  <p className="text-xs text-emerald-700/80">
-                    Gross:{' '}
-                    <span className="font-semibold">
-                      <InrAmount amount={takeHome.grossMonthly} />
-                    </span>{' '}
-                    • Deductions:{' '}
-                    <span className="font-semibold">
-                      <InrAmount amount={takeHome.totalDeductions} />
-                    </span>
-                  </p>
-                </div>
+                {formErrors.annualCtc && (
+                  <p className="text-xs text-rose-600 mt-1">{formErrors.annualCtc}</p>
+                )}
+                <p className="text-xs text-slate-500 mt-1">
+                  Monthly CTC:{' '}
+                  <span className="font-semibold text-slate-700">
+                    <InrAmount amount={salaryBreakup.monthlyCtc} />
+                  </span>
+                </p>
               </div>
 
-              {/* Dynamic Live Breakdown Table */}
-              <div className="lg:col-span-2 border border-slate-200 rounded-xl p-4 bg-slate-50/40">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-                  Live Statutory Breakdown Preview
-                </h3>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-600">Basic (40%)</span>
-                    <span className="font-medium text-slate-900">
-                      <InrAmount amount={salaryBreakup.basicMonthly} />
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-600">HRA ({formData.workCity ? '50%/40%' : '40%'})</span>
-                    <span className="font-medium text-slate-900">
-                      <InrAmount amount={salaryBreakup.hraMonthly} />
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-600">LTA Monthly</span>
-                    <span className="font-medium text-slate-900">
-                      <InrAmount amount={salaryBreakup.ltaMonthly} />
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-600">Special Allowance</span>
-                    <span className="font-medium text-slate-900">
-                      <InrAmount amount={salaryBreakup.specialAllowance} />
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-600">Employer PF (12%)</span>
-                    <span className="font-medium text-slate-900">
-                      <InrAmount amount={salaryBreakup.employerPfMonthly} />
-                    </span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-600">Gratuity (4.81%)</span>
-                    <span className="font-medium text-slate-900">
-                      <InrAmount amount={salaryBreakup.gratuityMonthly} />
-                    </span>
-                  </div>
+              {/* Take-Home Highlight Card */}
+              <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                  Est. In-Hand Monthly Take-Home
+                </div>
+                <div className="text-2xl font-bold text-emerald-700">
+                  <InrAmount amount={takeHome.netTakeHomeMonthly} />
+                </div>
+                <p className="text-xs text-emerald-700/80">
+                  Gross:{' '}
+                  <span className="font-semibold">
+                    <InrAmount amount={takeHome.grossMonthly} />
+                  </span>{' '}
+                  • Deductions:{' '}
+                  <span className="font-semibold">
+                    <InrAmount amount={takeHome.totalDeductions} />
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Dynamic Live Breakdown Table */}
+            <div className="lg:col-span-2 border border-slate-200 rounded-xl p-4 bg-slate-50/40">
+              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
+                Live Statutory Breakdown Preview
+              </h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-600">Basic (40%)</span>
+                  <span className="font-medium text-slate-900">
+                    <InrAmount amount={salaryBreakup.basicMonthly} />
+                  </span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-600">HRA ({formData.workCity ? '50%/40%' : '40%'})</span>
+                  <span className="font-medium text-slate-900">
+                    <InrAmount amount={salaryBreakup.hraMonthly} />
+                  </span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-600">LTA Monthly</span>
+                  <span className="font-medium text-slate-900">
+                    <InrAmount amount={salaryBreakup.ltaMonthly} />
+                  </span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-600">Special Allowance</span>
+                  <span className="font-medium text-slate-900">
+                    <InrAmount amount={salaryBreakup.specialAllowance} />
+                  </span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-600">Employer PF (12%)</span>
+                  <span className="font-medium text-slate-900">
+                    <InrAmount amount={salaryBreakup.employerPfMonthly} />
+                  </span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-600">Gratuity (4.81%)</span>
+                  <span className="font-medium text-slate-900">
+                    <InrAmount amount={salaryBreakup.gratuityMonthly} />
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm flex items-start gap-3">
-            <Info className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
-            <div>
-              <p className="font-semibold">Notice regarding salary changes:</p>
-              <p className="text-xs text-amber-700 mt-0.5">
-                Compensation cannot be edited directly here to preserve full statutory audit compliance (SCD Type 2).
-                To revise this employee's salary, please save any demographic changes first and use the{' '}
-                <Link
-                  to={`/salary-revision/${id}`}
-                  className="font-bold underline hover:text-amber-900"
-                >
-                  Revise Salary
-                </Link>{' '}
-                action.
-              </p>
-            </div>
-          </div>
-        )}
+        </div>
 
         {/* Submit Actions */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">

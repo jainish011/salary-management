@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   DollarSign,
   Info,
+  Loader2,
   TrendingUp,
 } from 'lucide-react';
 import { employeesApi } from '../../api/employees.js';
@@ -50,10 +51,28 @@ export const SalaryRevisionPage: React.FC = () => {
   const [remarks, setRemarks] = useState<string>('');
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Initialize with current CTC if available
+  // Initialize with current CTC and next valid effective date if available
   useEffect(() => {
-    if (currentSal?.annualCtc) {
-      setNewAnnualCtc(Math.round(currentSal.annualCtc * 1.1)); // default to 10% hike
+    if (currentSal) {
+      if (currentSal.annualCtc) {
+        setNewAnnualCtc(Math.round(currentSal.annualCtc * 1.1)); // default to 10% hike
+      }
+      if (currentSal.effectiveFrom) {
+        const effDateStr =
+          typeof currentSal.effectiveFrom === 'string'
+            ? currentSal.effectiveFrom.split('T')[0]
+            : new Date(currentSal.effectiveFrom).toISOString().split('T')[0];
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (effDateStr >= todayStr) {
+          // If current salary effective date is today or in future, default to the next day
+          const d = new Date(effDateStr);
+          d.setDate(d.getDate() + 1);
+          setEffectiveFrom(d.toISOString().split('T')[0]);
+        } else {
+          setEffectiveFrom(todayStr);
+        }
+      }
     }
   }, [currentSal]);
 
@@ -259,7 +278,9 @@ export const SalaryRevisionPage: React.FC = () => {
                 className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
               />
               <p className="text-xs text-slate-500 mt-1">
-                The current salary will remain active until this effective date.
+                {revisionReason === 'CORRECTION'
+                  ? 'Administrative Rectification adjusts the current active salary structure directly.'
+                  : 'The current salary will remain active until this effective date.'}
               </p>
             </div>
 
@@ -454,11 +475,11 @@ export const SalaryRevisionPage: React.FC = () => {
           <button
             type="submit"
             disabled={revisionMutation.isPending}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {revisionMutation.isPending ? (
               <>
-                <LoadingSpinner size="sm" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Applying Revision...</span>
               </>
             ) : (

@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, IsNull } from 'typeorm';
 import { Employee } from '../entities/employee.entity.js';
-import { SalaryStructure } from '../entities/salary-structure.entity.js';
+import { SalaryStructure, RevisionReason } from '../entities/salary-structure.entity.js';
 import { AuditLog, AuditAction } from '../entities/audit-log.entity.js';
 import { CreateSalaryRevisionDto } from './dto/create-salary-revision.dto.js';
 import { calculateSalaryBreakup } from '../common/salary-calculator.util.js';
@@ -48,9 +48,18 @@ export class SalaryStructuresService {
       order: { effectiveFrom: 'DESC' },
     });
 
-    if (currentStructure && currentStructure.effectiveFrom >= dto.effectiveFrom) {
+    const currentEffFrom = currentStructure
+      ? (typeof currentStructure.effectiveFrom === 'string'
+          ? currentStructure.effectiveFrom.split('T')[0]
+          : new Date(currentStructure.effectiveFrom).toISOString().split('T')[0])
+      : null;
+
+    const dtoEffFrom = dto.effectiveFrom ? dto.effectiveFrom.split('T')[0] : null;
+    const isCorrection = dto.revisionReason === RevisionReason.CORRECTION;
+
+    if (currentStructure && currentEffFrom && !isCorrection && currentEffFrom >= dtoEffFrom!) {
       throw new BadRequestException(
-        `New effective date (${dto.effectiveFrom}) must be after current effective date (${currentStructure.effectiveFrom})`,
+        `New effective date (${dtoEffFrom}) must be after current effective date (${currentEffFrom}). Select "Administrative Rectification" (CORRECTION) to adjust the current salary.`,
       );
     }
 
@@ -67,6 +76,45 @@ export class SalaryStructuresService {
     await queryRunner.startTransaction();
 
     try {
+      // If it's a correction or same-day adjustment, update current active structure directly
+      if (currentStructure && (isCorrection || currentEffFrom === dtoEffFrom)) {
+        const oldValues = {
+          annualCtc: currentStructure.annualCtc,
+          monthlyCtc: currentStructure.monthlyCtc,
+          effectiveFrom: currentStructure.effectiveFrom,
+        };
+
+        Object.assign(currentStructure, {
+          ...breakup,
+          revisionReason: dto.revisionReason || RevisionReason.CORRECTION,
+          remarks: dto.remarks || currentStructure.remarks,
+        });
+
+        const savedStructure = await queryRunner.manager.save(currentStructure);
+
+        const audit = queryRunner.manager.create(AuditLog, {
+          entityType: 'SALARY_STRUCTURE',
+          entityId: savedStructure.id,
+          action: AuditAction.UPDATE,
+          oldValues,
+          newValues: {
+            annualCtc: savedStructure.annualCtc,
+            monthlyCtc: savedStructure.monthlyCtc,
+            effectiveFrom: savedStructure.effectiveFrom,
+            revisionReason: savedStructure.revisionReason,
+          },
+          changedBy: userId || null,
+        });
+        await queryRunner.manager.save(audit);
+        await queryRunner.commitTransaction();
+
+        if (this.cacheService) {
+          await this.cacheService.delPattern('reports:*');
+        }
+
+        return savedStructure;
+      }
+
       // 1. Close current active structure (SCD Type 2)
       if (currentStructure) {
         currentStructure.effectiveTo = effectiveToDate;
