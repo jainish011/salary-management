@@ -8,6 +8,7 @@ import {
   Loader2,
   Lock,
   Play,
+  RefreshCw,
   Search,
 } from 'lucide-react';
 import { payrollApi } from '../../api/payroll.js';
@@ -169,13 +170,35 @@ export const PayrollDetailPage: React.FC = () => {
           )}
 
           {isProcessing && (
-            <button
-              onClick={() => setShowLockModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 rounded-lg shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
-            >
-              <Lock className="w-4 h-4" />
-              Lock & Finalize Period
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => runMutation.mutate()}
+                disabled={runMutation.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                title="Recalculate all employee payslips with the latest salary structures"
+              >
+                {runMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Recalculating...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 text-slate-500" />
+                    <span>Re-run Calculations</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => setShowLockModal(true)}
+                disabled={runMutation.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 rounded-lg shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Lock & Finalize Period</span>
+              </button>
+            </div>
           )}
 
           {isLocked && (

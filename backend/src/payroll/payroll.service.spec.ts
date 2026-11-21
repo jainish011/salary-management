@@ -3,6 +3,7 @@ import { NotFoundException, BadRequestException, ConflictException } from '@nest
 import { PayrollService } from './payroll.service.js';
 import { PayrollPeriodStatus } from '../entities/payroll-period.entity.js';
 import { EmploymentStatus } from '../entities/employee.entity.js';
+import { Payslip } from '../entities/payslip.entity.js';
 
 describe('PayrollService', () => {
   let service: PayrollService;
@@ -132,6 +133,7 @@ describe('PayrollService', () => {
       rollbackTransaction: vi.fn().mockResolvedValue(undefined),
       release: vi.fn().mockResolvedValue(undefined),
       manager: {
+        delete: vi.fn().mockResolvedValue({}),
         create: vi.fn().mockImplementation((cls, data) => ({ id: 'mock-id', ...data })),
         save: vi.fn().mockImplementation((clsOrData, data) => Promise.resolve(data || clsOrData)),
         createQueryBuilder: vi.fn().mockReturnValue({
@@ -236,13 +238,24 @@ describe('PayrollService', () => {
       );
     });
 
-    it('should throw BadRequestException if payslips already exist for period', async () => {
-      mockPeriodRepo.findOne.mockResolvedValue({ ...mockPeriod });
-      mockPayslipRepo.count.mockResolvedValue(100);
+    it('should allow re-running payroll on an unlocked period and delete old payslips', async () => {
+      mockPeriodRepo.findOne.mockResolvedValue({
+        ...mockPeriod,
+        status: PayrollPeriodStatus.PROCESSING,
+      });
 
-      await expect(service.runPayroll('period-uuid-1')).rejects.toThrow(
-        BadRequestException,
-      );
+      const mockEmpQb = {
+        innerJoinAndMapOne: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        getMany: vi.fn().mockResolvedValue(mockEmployeesWithSalary),
+      };
+      mockEmployeeRepo.createQueryBuilder.mockReturnValue(mockEmpQb);
+
+      const result = await service.runPayroll('period-uuid-1', 'admin-user');
+
+      expect(result.totalEmployees).toBe(2);
+      expect(mockQueryRunner.manager.delete).toHaveBeenCalledWith(Payslip, { periodId: 'period-uuid-1' });
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
     });
   });
 

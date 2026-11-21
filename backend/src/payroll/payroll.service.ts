@@ -157,16 +157,6 @@ export class PayrollService {
       throw new BadRequestException('Cannot run payroll on a LOCKED period');
     }
 
-    const existingPayslipsCount = await this.payslipRepository.count({
-      where: { periodId },
-    });
-
-    if (existingPayslipsCount > 0) {
-      throw new BadRequestException(
-        'Payroll has already been processed for this period. Re-run is not permitted on non-empty period.',
-      );
-    }
-
     // Update status to PROCESSING
     period.status = PayrollPeriodStatus.PROCESSING;
     await this.periodRepository.save(period);
@@ -193,6 +183,9 @@ export class PayrollService {
     let totalTds = 0;
 
     try {
+      // Clear previous payslips for this period if re-running
+      await queryRunner.manager.delete(Payslip, { periodId });
+
       // Process in chunks of 500 with batch inserts for high performance
       const CHUNK_SIZE = 500;
       for (let i = 0; i < employees.length; i += CHUNK_SIZE) {
