@@ -102,6 +102,17 @@ export class PayrollService {
       );
     }
 
+    // Auto-calculate exact first and last day of the selected month
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const lastDayOfMonth = new Date(Date.UTC(dto.year, dto.month, 0)).getUTCDate();
+    const defaultStartDate = `${dto.year}-${pad(dto.month)}-01`;
+    const defaultEndDate = `${dto.year}-${pad(dto.month)}-${pad(lastDayOfMonth)}`;
+    const defaultPayDate = `${dto.year}-${pad(dto.month)}-${pad(lastDayOfMonth)}`;
+
+    const startDate = dto.startDate || defaultStartDate;
+    const endDate = dto.endDate || defaultEndDate;
+    const payDate = dto.payDate || defaultPayDate;
+
     // Fiscal year: April to March
     const fyStart = dto.month >= 4 ? dto.year : dto.year - 1;
     const fyEnd = (fyStart + 1).toString().slice(-2);
@@ -110,6 +121,9 @@ export class PayrollService {
 
     const period = this.periodRepository.create({
       ...dto,
+      startDate,
+      endDate,
+      payDate,
       periodName,
       fiscalYear,
       status: PayrollPeriodStatus.OPEN,

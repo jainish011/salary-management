@@ -200,7 +200,7 @@ export const EmployeeListPage: React.FC = () => {
     <div className="space-y-5">
       <PageHeader
         title="Employee Directory"
-        description="Search, filter, and manage records across all 10,000 organization employees."
+        description="Search, filter, and manage organization employee records."
       >
         <Link
           to="/employees/new"

@@ -2,10 +2,12 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, IsNull } from 'typeorm';
 import { Employee, EmploymentStatus } from '../entities/employee.entity.js';
+import { Department } from '../entities/department.entity.js';
 import { SalaryStructure, RevisionReason } from '../entities/salary-structure.entity.js';
 import { Payslip } from '../entities/payslip.entity.js';
 import { AuditLog, AuditAction } from '../entities/audit-log.entity.js';
@@ -151,6 +153,57 @@ export class EmployeesService {
       );
     }
 
+    if (dto.departmentId && typeof this.dataSource?.getRepository === 'function') {
+      const dept = await this.dataSource.getRepository(Department).findOne({
+        where: { id: dto.departmentId },
+      });
+      if (!dept) {
+        throw new NotFoundException(`Department with ID "${dto.departmentId}" not found`);
+      }
+    }
+
+    if (dto.dateOfBirth) {
+      const dob = new Date(dto.dateOfBirth);
+      const doj = new Date(dto.dateOfJoining);
+      if (isNaN(dob.getTime())) {
+        throw new BadRequestException('Invalid date of birth');
+      }
+      if (isNaN(doj.getTime())) {
+        throw new BadRequestException('Invalid date of joining');
+      }
+      if (dob >= doj) {
+        throw new BadRequestException('Date of birth must be before date of joining');
+      }
+      let age = doj.getFullYear() - dob.getFullYear();
+      const m = doj.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && doj.getDate() < dob.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        throw new BadRequestException('Employee must be at least 18 years old at date of joining');
+      }
+    }
+
+    if (dto.panNumber) {
+      const pan = dto.panNumber.trim().toUpperCase();
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+        throw new BadRequestException('PAN must be in standard Indian format (e.g., ABCDE1234F)');
+      }
+      dto.panNumber = pan;
+    }
+
+    if (dto.uanNumber) {
+      const uan = dto.uanNumber.trim();
+      if (!/^\d{12}$/.test(uan)) {
+        throw new BadRequestException('UAN must be exactly 12 digits');
+      }
+      dto.uanNumber = uan;
+    }
+
+    if (!dto.annualCtc || dto.annualCtc < 100000) {
+      throw new BadRequestException('Annual CTC must be at least ₹1,00,000');
+    }
+
     // Auto-generate employee code: EMP + 6 digits
     const count = await this.employeeRepository.count();
     const employeeCode = `EMP${(count + 1).toString().padStart(6, '0')}`;
@@ -217,6 +270,50 @@ export class EmployeesService {
       throw new NotFoundException(`Employee with ID "${id}" not found`);
     }
 
+    if (dto.departmentId && typeof this.dataSource?.getRepository === 'function') {
+      const dept = await this.dataSource.getRepository(Department).findOne({
+        where: { id: dto.departmentId },
+      });
+      if (!dept) {
+        throw new NotFoundException(`Department with ID "${dto.departmentId}" not found`);
+      }
+    }
+
+    if (dto.dateOfBirth) {
+      const dob = new Date(dto.dateOfBirth);
+      const doj = new Date(dto.dateOfJoining || employee.dateOfJoining);
+      if (isNaN(dob.getTime())) {
+        throw new BadRequestException('Invalid date of birth');
+      }
+      if (dob >= doj) {
+        throw new BadRequestException('Date of birth must be before date of joining');
+      }
+      let age = doj.getFullYear() - dob.getFullYear();
+      const m = doj.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && doj.getDate() < dob.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        throw new BadRequestException('Employee must be at least 18 years old at date of joining');
+      }
+    }
+
+    if (dto.panNumber) {
+      const pan = dto.panNumber.trim().toUpperCase();
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+        throw new BadRequestException('PAN must be in standard Indian format (e.g., ABCDE1234F)');
+      }
+      dto.panNumber = pan;
+    }
+
+    if (dto.uanNumber) {
+      const uan = dto.uanNumber.trim();
+      if (!/^\d{12}$/.test(uan)) {
+        throw new BadRequestException('UAN must be exactly 12 digits');
+      }
+      dto.uanNumber = uan;
+    }
+
     if (dto.email && dto.email.toLowerCase().trim() !== employee.email) {
       const existing = await this.employeeRepository.findOne({
         where: { email: dto.email.toLowerCase().trim() },
@@ -251,6 +348,12 @@ export class EmployeesService {
     const employee = await this.employeeRepository.findOne({ where: { id } });
     if (!employee) {
       throw new NotFoundException(`Employee with ID "${id}" not found`);
+    }
+
+    if (employee.employmentStatus === EmploymentStatus.TERMINATED) {
+      throw new BadRequestException(
+        `Employee "${employee.firstName} ${employee.lastName}" is already terminated`,
+      );
     }
 
     const today = new Date().toISOString().split('T')[0];

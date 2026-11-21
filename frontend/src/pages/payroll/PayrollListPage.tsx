@@ -5,6 +5,7 @@ import {
   Calendar,
   DollarSign,
   FileSpreadsheet,
+  Loader2,
   Plus,
   Users,
   X,
@@ -32,22 +33,16 @@ export const PayrollListPage: React.FC = () => {
   const now = new Date();
   const [newMonth, setNewMonth] = useState<number>(now.getMonth() + 1);
   const [newYear, setNewYear] = useState<number>(now.getFullYear());
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [payDate, setPayDate] = useState<string>('');
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Auto-fill dates when month or year changes
-  const updateDatesForMonth = (m: number, y: number) => {
-    const firstDay = new Date(Date.UTC(y, m - 1, 1));
-    const lastDay = new Date(Date.UTC(y, m, 0));
-    setStartDate(firstDay.toISOString().split('T')[0]);
-    setEndDate(lastDay.toISOString().split('T')[0]);
-    setPayDate(lastDay.toISOString().split('T')[0]);
-  };
+  // Compute first and last date of month
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const lastDayNumber = new Date(Date.UTC(newYear, newMonth, 0)).getUTCDate();
+  const computedStartDate = `${newYear}-${pad(newMonth)}-01`;
+  const computedEndDate = `${newYear}-${pad(newMonth)}-${pad(lastDayNumber)}`;
+  const computedPayDate = `${newYear}-${pad(newMonth)}-${pad(lastDayNumber)}`;
 
   const handleOpenModal = () => {
-    updateDatesForMonth(newMonth, newYear);
     setShowModal(true);
     setFormError(null);
   };
@@ -79,16 +74,25 @@ export const PayrollListPage: React.FC = () => {
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!startDate || !endDate) {
-      setFormError('Please select both start and end dates');
+    setFormError(null);
+
+    // Validation: prevent duplicate period
+    const exists = periods.some(
+      (p) => Number(p.month) === Number(newMonth) && Number(p.year) === Number(newYear),
+    );
+    if (exists) {
+      setFormError(
+        `A payroll cycle for ${MONTH_NAMES[newMonth - 1]} ${newYear} already exists.`,
+      );
       return;
     }
+
     createMutation.mutate({
       month: Number(newMonth),
       year: Number(newYear),
-      startDate,
-      endDate,
-      payDate: payDate || undefined,
+      startDate: computedStartDate,
+      endDate: computedEndDate,
+      payDate: computedPayDate,
     });
   };
 
@@ -289,15 +293,14 @@ export const PayrollListPage: React.FC = () => {
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Month
                   </label>
                   <select
                     value={newMonth}
                     onChange={(e) => {
-                      const m = Number(e.target.value);
-                      setNewMonth(m);
-                      updateDatesForMonth(m, newYear);
+                      setNewMonth(Number(e.target.value));
+                      setFormError(null);
                     }}
                     className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                   >
@@ -310,7 +313,7 @@ export const PayrollListPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Year
                   </label>
                   <input
@@ -319,72 +322,50 @@ export const PayrollListPage: React.FC = () => {
                     max={2035}
                     value={newYear}
                     onChange={(e) => {
-                      const y = Number(e.target.value);
-                      setNewYear(y);
-                      updateDatesForMonth(newMonth, y);
+                      setNewYear(Number(e.target.value));
+                      setFormError(null);
                     }}
                     className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                  />
+              {/* Automatic Period Dates Card */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Period Duration:</span>
+                  <span className="font-semibold text-slate-800">
+                    01 {MONTH_NAMES[newMonth - 1]} {newYear} – {lastDayNumber} {MONTH_NAMES[newMonth - 1]} {newYear}
+                  </span>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                  />
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Scheduled Pay Date:</span>
+                  <span className="font-semibold text-emerald-700">
+                    {lastDayNumber} {MONTH_NAMES[newMonth - 1]} {newYear} (Month-End)
+                  </span>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                  Scheduled Pay Date (Optional)
-                </label>
-                <input
-                  type="date"
-                  value={payDate}
-                  onChange={(e) => setPayDate(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                />
+                <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-200/60">
+                  Dates are automatically computed for the full calendar month according to standard statutory cycle rules.
+                </p>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                  className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors flex items-center gap-2"
                 >
                   {createMutation.isPending ? (
                     <>
-                      <LoadingSpinner size="sm" />
-                      <span>Opening...</span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Opening Period...</span>
                     </>
                   ) : (
                     'Open Period'

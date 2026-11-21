@@ -7,6 +7,7 @@ import {
   CreditCard,
   DollarSign,
   Info,
+  Loader2,
   Save,
   User,
 } from 'lucide-react';
@@ -48,7 +49,6 @@ export const EmployeeFormPage: React.FC = () => {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
     dateOfBirth: '',
     gender: 'MALE',
     dateOfJoining: new Date().toISOString().split('T')[0],
@@ -60,8 +60,7 @@ export const EmployeeFormPage: React.FC = () => {
     workState: 'Karnataka',
     taxRegime: 'NEW' as TaxRegime,
     panNumber: '',
-    bankAccountNumber: '',
-    bankIfsc: '',
+    uanNumber: '',
     annualCtc: 1200000,
   });
 
@@ -75,7 +74,6 @@ export const EmployeeFormPage: React.FC = () => {
         firstName: existingEmployee.firstName || '',
         lastName: existingEmployee.lastName || '',
         email: existingEmployee.email || '',
-        phone: existingEmployee.phone || '',
         dateOfBirth: existingEmployee.dateOfBirth
           ? existingEmployee.dateOfBirth.split('T')[0]
           : '',
@@ -91,8 +89,7 @@ export const EmployeeFormPage: React.FC = () => {
         workState: existingEmployee.workState || 'Karnataka',
         taxRegime: existingEmployee.taxRegime || 'NEW',
         panNumber: existingEmployee.panNumber || '',
-        bankAccountNumber: existingEmployee.bankAccountNumber || '',
-        bankIfsc: existingEmployee.bankIfsc || '',
+        uanNumber: (existingEmployee as any).uanNumber || '',
         annualCtc: existingEmployee.currentSalary?.annualCtc || 1200000,
       });
     }
@@ -119,24 +116,59 @@ export const EmployeeFormPage: React.FC = () => {
   const validateForm = () => {
     const errors: Record<string, string> = {};
 
-    if (!formData.firstName.trim()) errors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email address';
+    if (!formData.firstName.trim()) {
+      errors.firstName = 'First name is required';
+    } else if (formData.firstName.trim().length < 2) {
+      errors.firstName = 'First name must be at least 2 characters';
     }
 
-    if (!formData.dateOfJoining) errors.dateOfJoining = 'Joining date is required';
-    if (!formData.designation.trim()) errors.designation = 'Designation is required';
-    if (!formData.departmentId) errors.departmentId = 'Department is required';
+    if (!formData.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+    }
 
-    if (!isEditMode && (!formData.annualCtc || formData.annualCtc < 100000)) {
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.dateOfJoining) {
+      errors.dateOfJoining = 'Joining date is required';
+    }
+
+    if (formData.dateOfBirth && formData.dateOfJoining) {
+      const dob = new Date(formData.dateOfBirth);
+      const doj = new Date(formData.dateOfJoining);
+      if (dob >= doj) {
+        errors.dateOfBirth = 'Date of birth must be earlier than date of joining';
+      }
+    }
+
+    if (!formData.designation.trim()) {
+      errors.designation = 'Designation is required';
+    }
+
+    if (!formData.departmentId) {
+      errors.departmentId = 'Department is required';
+    }
+
+    if (!formData.workCity) {
+      errors.workCity = 'Work city is required';
+    }
+
+    if (!isEditMode && (!formData.annualCtc || Number(formData.annualCtc) < 100000)) {
       errors.annualCtc = 'Annual CTC must be at least ₹1,00,000';
     }
 
-    if (formData.panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber.toUpperCase())) {
-      errors.panNumber = 'Invalid PAN format (e.g., ABCDE1234F)';
+    if (
+      formData.panNumber.trim() &&
+      !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber.trim().toUpperCase())
+    ) {
+      errors.panNumber = 'Invalid Indian PAN format (e.g., ABCDE1234F)';
+    }
+
+    if (formData.uanNumber.trim() && !/^\d{12}$/.test(formData.uanNumber.trim())) {
+      errors.uanNumber = 'UAN must be exactly 12 digits';
     }
 
     setFormErrors(errors);
@@ -180,19 +212,29 @@ export const EmployeeFormPage: React.FC = () => {
 
     if (!validateForm()) return;
 
+    const payload: any = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      dateOfJoining: formData.dateOfJoining,
+      dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth : undefined,
+      gender: formData.gender,
+      departmentId: formData.departmentId,
+      designation: formData.designation.trim(),
+      grade: formData.grade,
+      employmentStatus: formData.employmentStatus,
+      workCity: formData.workCity,
+      workState: formData.workState,
+      taxRegime: formData.taxRegime,
+      panNumber: formData.panNumber.trim() ? formData.panNumber.trim().toUpperCase() : undefined,
+      uanNumber: formData.uanNumber.trim() ? formData.uanNumber.trim() : undefined,
+    };
+
     if (isEditMode) {
-      // Exclude annualCtc from employee update (salary revision is handled separately)
-      const { annualCtc, ...updatePayload } = formData;
-      updateMutation.mutate({
-        ...updatePayload,
-        panNumber: updatePayload.panNumber ? updatePayload.panNumber.toUpperCase() : null,
-        bankIfsc: updatePayload.bankIfsc ? updatePayload.bankIfsc.toUpperCase() : null,
-      });
+      updateMutation.mutate(payload);
     } else {
       createMutation.mutate({
-        ...formData,
-        panNumber: formData.panNumber ? formData.panNumber.toUpperCase() : null,
-        bankIfsc: formData.bankIfsc ? formData.bankIfsc.toUpperCase() : null,
+        ...payload,
         annualCtc: Number(formData.annualCtc),
       });
     }
@@ -245,7 +287,7 @@ export const EmployeeFormPage: React.FC = () => {
             1. Personal Information
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                 First Name <span className="text-rose-500">*</span>
@@ -308,21 +350,6 @@ export const EmployeeFormPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, phone: e.target.value }))
-                }
-                placeholder="+91 98765 43210"
-                className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                 Date of Birth
               </label>
               <input
@@ -331,8 +358,13 @@ export const EmployeeFormPage: React.FC = () => {
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, dateOfBirth: e.target.value }))
                 }
-                className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
+                className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all ${
+                  formErrors.dateOfBirth ? 'border-rose-400 ring-rose-200' : 'border-slate-300'
+                }`}
               />
+              {formErrors.dateOfBirth && (
+                <p className="text-xs text-rose-600 mt-1">{formErrors.dateOfBirth}</p>
+              )}
             </div>
 
             <div>
@@ -476,7 +508,7 @@ export const EmployeeFormPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 3: Statutory & Banking Details */}
+        {/* Section 3: Statutory & Taxation Details */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
           <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
             <CreditCard className="w-4 h-4 text-indigo-600" />
@@ -496,7 +528,7 @@ export const EmployeeFormPage: React.FC = () => {
                     taxRegime: e.target.value as TaxRegime,
                   }))
                 }
-                className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
+                className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer"
               >
                 <option value="NEW">New Tax Regime (Section 115BAC)</option>
                 <option value="OLD">Old Tax Regime (with 80C/80D/HRA)</option>
@@ -529,39 +561,26 @@ export const EmployeeFormPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Bank IFSC Code
+                UAN (Universal Account Number)
               </label>
               <input
                 type="text"
-                maxLength={11}
-                value={formData.bankIfsc}
+                maxLength={12}
+                value={formData.uanNumber}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    bankIfsc: e.target.value.toUpperCase(),
+                    uanNumber: e.target.value.replace(/\D/g, ''),
                   }))
                 }
-                placeholder="HDFC0001234"
-                className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
+                placeholder="100912345678 (12 Digits)"
+                className={`w-full px-3.5 py-2 text-sm font-mono rounded-lg border bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all ${
+                  formErrors.uanNumber ? 'border-rose-400 ring-rose-200' : 'border-slate-300'
+                }`}
               />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Bank Account Number
-              </label>
-              <input
-                type="text"
-                value={formData.bankAccountNumber}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    bankAccountNumber: e.target.value,
-                  }))
-                }
-                placeholder="e.g. 50100234567890"
-                className="w-full px-3.5 py-2 text-sm font-mono rounded-lg border border-slate-300 bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
-              />
+              {formErrors.uanNumber && (
+                <p className="text-xs text-rose-600 mt-1">{formErrors.uanNumber}</p>
+              )}
             </div>
           </div>
         </div>
@@ -716,11 +735,11 @@ export const EmployeeFormPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>
-                <LoadingSpinner size="sm" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Saving...</span>
               </>
             ) : (

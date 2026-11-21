@@ -9,6 +9,7 @@ import {
   FileSpreadsheet,
   FileText,
   History,
+  Loader2,
   Mail,
   MapPin,
   Phone,
@@ -663,11 +664,21 @@ export const EmployeeDetailPage: React.FC = () => {
               <span className="font-semibold text-rose-600">TERMINATED</span>, setting their
               date of leaving to today and excluding them from subsequent payroll runs.
             </p>
-            <div className="flex items-center justify-end gap-3 pt-3">
+            {terminateMutation.isError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs">
+                {(terminateMutation.error as any)?.response?.data?.message ||
+                  (terminateMutation.error as Error)?.message ||
+                  'Failed to terminate employee.'}
+              </div>
+            )}
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <button
                 type="button"
-                onClick={() => setShowTerminateModal(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                onClick={() => {
+                  terminateMutation.reset();
+                  setShowTerminateModal(false);
+                }}
+                className="px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                 disabled={terminateMutation.isPending}
               >
                 Cancel
@@ -675,10 +686,17 @@ export const EmployeeDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => terminateMutation.mutate()}
-                className="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition-colors flex items-center gap-2"
+                className="px-4 py-2.5 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                 disabled={terminateMutation.isPending}
               >
-                {terminateMutation.isPending ? 'Terminating...' : 'Confirm Termination'}
+                {terminateMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Terminating...</span>
+                  </>
+                ) : (
+                  'Confirm Termination'
+                )}
               </button>
             </div>
           </div>

@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Calendar,
   FileText,
+  Loader2,
   Lock,
   Play,
   RefreshCw,
@@ -151,12 +152,12 @@ export const PayrollDetailPage: React.FC = () => {
             <button
               onClick={() => runMutation.mutate()}
               disabled={runMutation.isPending}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors disabled:opacity-50"
             >
               {runMutation.isPending ? (
                 <>
-                  <LoadingSpinner size="sm" />
-                  <span>Computing 10,000 Employees...</span>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Computing Payroll...</span>
                 </>
               ) : (
                 <>
@@ -172,11 +173,11 @@ export const PayrollDetailPage: React.FC = () => {
               <button
                 onClick={() => runMutation.mutate()}
                 disabled={runMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-xs"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-xs disabled:opacity-50"
               >
                 {runMutation.isPending ? (
                   <>
-                    <LoadingSpinner size="sm" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Recalculating...</span>
                   </>
                 ) : (

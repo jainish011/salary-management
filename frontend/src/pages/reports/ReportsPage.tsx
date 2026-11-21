@@ -16,6 +16,7 @@ import {
   Building2,
   Download,
   Layers,
+  Loader2,
   MapPin,
   TrendingUp,
 } from 'lucide-react';
@@ -96,13 +97,13 @@ export const ReportsPage: React.FC = () => {
         >
           {isExporting ? (
             <>
-              <LoadingSpinner size="sm" />
+              <Loader2 className="w-4 h-4 animate-spin" />
               <span>Exporting CSV...</span>
             </>
           ) : (
             <>
               <Download className="w-4 h-4" />
-              Download Master CSV (10,000 Rows)
+              <span>Download Master CSV</span>
             </>
           )}
         </button>
@@ -236,7 +237,7 @@ export const ReportsPage: React.FC = () => {
                     Salary Distribution (CTC Bands)
                   </h2>
                 </div>
-                <span className="text-xs text-slate-500">10,000 Employees</span>
+                <span className="text-xs text-slate-500">All Employees</span>
               </div>
 
               <div className="h-72 w-full">
