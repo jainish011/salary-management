@@ -8,7 +8,6 @@ import {
   Loader2,
   Lock,
   Play,
-  RefreshCw,
   Search,
 } from 'lucide-react';
 import { payrollApi } from '../../api/payroll.js';
@@ -127,8 +126,9 @@ export const PayrollDetailPage: React.FC = () => {
   }
 
   const isLocked = period.status === 'LOCKED';
-  const isProcessing = period.status === 'PROCESSING';
-  const isOpen = period.status === 'OPEN';
+  const hasBeenRun = Boolean(period.runAt) || (period.totalEmployees != null && period.totalEmployees > 0);
+  const isProcessing = period.status === 'PROCESSING' || (!isLocked && hasBeenRun);
+  const isOpen = period.status === 'OPEN' && !hasBeenRun;
   const payslips = payslipsResponse?.data || [];
   const meta = payslipsResponse?.meta;
 
@@ -169,33 +169,13 @@ export const PayrollDetailPage: React.FC = () => {
           )}
 
           {isProcessing && (
-            <>
-              <button
-                onClick={() => runMutation.mutate()}
-                disabled={runMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-xs disabled:opacity-50"
-              >
-                {runMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Recalculating...</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4 text-slate-500" />
-                    Re-run Calculations
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={() => setShowLockModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 rounded-lg shadow-xs hover:bg-emerald-700 transition-colors"
-              >
-                <Lock className="w-4 h-4" />
-                Lock & Finalize Period
-              </button>
-            </>
+            <button
+              onClick={() => setShowLockModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 rounded-lg shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
+            >
+              <Lock className="w-4 h-4" />
+              Lock & Finalize Period
+            </button>
           )}
 
           {isLocked && (
@@ -497,7 +477,7 @@ export const PayrollDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowLockModal(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                 disabled={lockMutation.isPending}
               >
                 Cancel
@@ -505,10 +485,17 @@ export const PayrollDetailPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => lockMutation.mutate()}
-                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition-colors flex items-center gap-2"
+                className="px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                 disabled={lockMutation.isPending}
               >
-                {lockMutation.isPending ? 'Locking...' : 'Confirm & Lock Period'}
+                {lockMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Locking Period...</span>
+                  </>
+                ) : (
+                  'Confirm & Lock Period'
+                )}
               </button>
             </div>
           </div>

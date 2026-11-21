@@ -269,7 +269,7 @@ export class PayrollService {
       }
 
       // Update Period Summary
-      period.status = PayrollPeriodStatus.OPEN;
+      period.status = PayrollPeriodStatus.PROCESSING;
       period.totalEmployees = employees.length;
       period.totalGross = totalGross;
       period.totalNet = totalNet;
