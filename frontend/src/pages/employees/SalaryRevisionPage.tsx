@@ -258,7 +258,7 @@ export const SalaryRevisionPage: React.FC = () => {
                 <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold">₹</span>
                 <input
                   type="number"
-                  step={25000}
+                  step="any"
                   min={100000}
                   value={newAnnualCtc}
                   onChange={(e) => setNewAnnualCtc(Number(e.target.value))}

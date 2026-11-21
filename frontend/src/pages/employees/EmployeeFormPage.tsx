@@ -628,7 +628,7 @@ export const EmployeeFormPage: React.FC = () => {
                   </span>
                   <input
                     type="number"
-                    step={50000}
+                    step="any"
                     min={100000}
                     value={formData.annualCtc}
                     onChange={(e) =>
