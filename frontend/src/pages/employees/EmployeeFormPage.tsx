@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
   ArrowLeft,
   Building2,
   CreditCard,
   DollarSign,
   Info,
   Loader2,
+  Lock,
   Save,
   User,
 } from 'lucide-react';
@@ -24,6 +26,7 @@ import {
 import type { EmploymentStatus, TaxRegime } from '../../types/index.js';
 
 const GRADES = ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7'];
+const AUTHORIZED_DOMAINS = ['acme.com', 'acmecorp.com', 'acme.in'];
 
 export const EmployeeFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +46,11 @@ export const EmployeeFormPage: React.FC = () => {
     queryFn: () => employeesApi.getById(id!),
     enabled: isEditMode,
   });
+
+  const isTerminated = isEditMode && existingEmployee?.employmentStatus === 'TERMINATED';
+
+  // Domain selection for corporate email validation
+  const [selectedDomain, setSelectedDomain] = useState<string>('acme.com');
 
   // Form State
   const [formData, setFormData] = useState({
@@ -70,6 +78,13 @@ export const EmployeeFormPage: React.FC = () => {
   // Populate data when editing
   useEffect(() => {
     if (existingEmployee) {
+      if (existingEmployee.email && existingEmployee.email.includes('@')) {
+        const domain = existingEmployee.email.split('@')[1]?.toLowerCase();
+        if (AUTHORIZED_DOMAINS.includes(domain)) {
+          setSelectedDomain(domain);
+        }
+      }
+
       setFormData({
         firstName: existingEmployee.firstName || '',
         lastName: existingEmployee.lastName || '',
@@ -128,8 +143,16 @@ export const EmployeeFormPage: React.FC = () => {
 
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = 'Please enter a valid email address';
+    } else {
+      const emailTrimmed = formData.email.trim().toLowerCase();
+      const parts = emailTrimmed.split('@');
+      if (parts.length !== 2 || !parts[0] || !parts[1]) {
+        errors.email = `Please enter a complete email address ending with @${selectedDomain}`;
+      } else if (parts[1] !== selectedDomain) {
+        errors.email = `Email domain (@${parts[1]}) must match the selected company domain (@${selectedDomain})`;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+        errors.email = 'Please enter a valid email address';
+      }
     }
 
     if (!formData.dateOfJoining) {
@@ -224,6 +247,7 @@ export const EmployeeFormPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isTerminated) return;
     setSubmitError(null);
 
     if (!validateForm()) return;
@@ -232,6 +256,7 @@ export const EmployeeFormPage: React.FC = () => {
       firstName: formData.firstName.trim(),
       lastName: formData.lastName.trim(),
       email: formData.email.trim().toLowerCase(),
+      emailDomain: selectedDomain,
       dateOfJoining: formData.dateOfJoining,
       dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth : undefined,
       gender: formData.gender,
@@ -287,6 +312,19 @@ export const EmployeeFormPage: React.FC = () => {
             : 'Register a new employee into ACME Corp with automatic SCD Type 2 salary structure generation.'
         }
       />
+
+      {isTerminated && (
+        <div className="p-4 bg-rose-50/90 border border-rose-200 rounded-xl text-rose-900 text-sm flex items-start gap-3 shadow-xs">
+          <AlertTriangle className="w-5 h-5 flex-shrink-0 text-rose-600 mt-0.5" />
+          <div>
+            <p className="font-semibold">Terminated Employee Profile Locked</p>
+            <p className="text-xs text-rose-700 mt-0.5">
+              This employee was terminated{existingEmployee?.dateOfLeaving ? ` on ${new Date(existingEmployee.dateOfLeaving).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}.
+              Their profile, employment details, and compensation cannot be edited.
+            </p>
+          </div>
+        </div>
+      )}
 
       {submitError && (
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm flex items-center gap-3">
@@ -345,22 +383,51 @@ export const EmployeeFormPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Work Email <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  Work Email <span className="text-rose-500">*</span>
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-slate-500 font-medium">Domain:</span>
+                  <select
+                    value={selectedDomain}
+                    disabled={isTerminated}
+                    onChange={(e) => {
+                      const newDomain = e.target.value;
+                      setSelectedDomain(newDomain);
+                      if (formData.email.includes('@')) {
+                        const localPart = formData.email.split('@')[0];
+                        setFormData((prev) => ({ ...prev, email: `${localPart}@${newDomain}` }));
+                      }
+                    }}
+                    className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {AUTHORIZED_DOMAINS.map((domain) => (
+                      <option key={domain} value={domain}>
+                        @{domain}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <input
                 type="email"
+                disabled={isTerminated}
                 value={formData.email}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, email: e.target.value }))
                 }
-                placeholder="ramesh.sharma@acme.com"
+                placeholder={`ramesh.sharma@${selectedDomain}`}
                 className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-slate-50/50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all ${
                   formErrors.email ? 'border-rose-400 ring-rose-200' : 'border-slate-300'
-                }`}
+                } ${isTerminated ? 'opacity-60 cursor-not-allowed bg-slate-100' : ''}`}
               />
-              {formErrors.email && (
+              {formErrors.email ? (
                 <p className="text-xs text-rose-600 mt-1">{formErrors.email}</p>
+              ) : (
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Must match authorized domain: <span className="font-semibold text-slate-600">@{selectedDomain}</span>
+                </p>
               )}
             </div>
 
@@ -732,13 +799,18 @@ export const EmployeeFormPage: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isSaving}
-            className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={isSaving || isTerminated}
+            className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Saving...</span>
+              </>
+            ) : isTerminated ? (
+              <>
+                <Lock className="w-4 h-4" />
+                <span>Profile Locked (Terminated)</span>
               </>
             ) : (
               <>

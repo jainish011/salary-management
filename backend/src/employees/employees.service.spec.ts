@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { EmployeesService } from './employees.service.js';
 import { EmploymentStatus, TaxRegime } from '../entities/employee.entity.js';
 import { calculateSalaryBreakup } from '../common/salary-calculator.util.js';
@@ -198,6 +198,27 @@ describe('EmployeesService', () => {
       expect(mockQueryRunner.release).toHaveBeenCalled();
     });
 
+    it('should throw BadRequestException if email uses unauthorized domain', async () => {
+      const dto: any = {
+        firstName: 'External',
+        lastName: 'Person',
+        email: 'person@gmail.com',
+      };
+
+      await expect(service.create(dto)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if email does not match selected domain', async () => {
+      const dto: any = {
+        firstName: 'Mismatch',
+        lastName: 'Domain',
+        email: 'user@acme.in',
+        emailDomain: 'acme.com',
+      };
+
+      await expect(service.create(dto)).rejects.toThrow(BadRequestException);
+    });
+
     it('should throw ConflictException if email already exists', async () => {
       mockEmployeeRepo.findOne.mockResolvedValue(mockEmployee);
 
@@ -208,6 +229,38 @@ describe('EmployeesService', () => {
       };
 
       await expect(service.create(dto)).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('update', () => {
+    it('should throw BadRequestException if employee is terminated', async () => {
+      mockEmployeeRepo.findOne.mockResolvedValue({
+        ...mockEmployee,
+        employmentStatus: EmploymentStatus.TERMINATED,
+      });
+
+      await expect(
+        service.update('emp-uuid-1', { designation: 'Lead Engineer' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException if updating email to an unauthorized domain', async () => {
+      mockEmployeeRepo.findOne.mockResolvedValue({ ...mockEmployee });
+
+      await expect(
+        service.update('emp-uuid-1', { email: 'bad@yahoo.com' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should update active employee profile successfully', async () => {
+      mockEmployeeRepo.findOne.mockResolvedValue({ ...mockEmployee });
+      mockEmployeeRepo.save.mockImplementation((emp: any) => Promise.resolve(emp));
+
+      const result = await service.update('emp-uuid-1', { designation: 'Principal Architect' });
+
+      expect(result.designation).toBe('Principal Architect');
+      expect(mockEmployeeRepo.save).toHaveBeenCalled();
+      expect(mockAuditRepo.save).toHaveBeenCalled();
     });
   });
 

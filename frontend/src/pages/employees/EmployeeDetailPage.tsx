@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
   ArrowLeft,
   Calendar,
   CreditCard,
@@ -10,6 +11,7 @@ import {
   FileText,
   History,
   Loader2,
+  Lock,
   Mail,
   MapPin,
   Phone,
@@ -70,6 +72,8 @@ export const EmployeeDetailPage: React.FC = () => {
       setShowTerminateModal(false);
       queryClient.invalidateQueries({ queryKey: ['employee', id] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       refetch();
     },
   });
@@ -129,33 +133,54 @@ export const EmployeeDetailPage: React.FC = () => {
         </Link>
 
         <div className="flex items-center gap-3">
-          <Link
-            to={`/employees/${employee.id}/edit`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg shadow-xs hover:bg-slate-50 transition-colors"
-          >
-            <Edit className="w-4 h-4 text-slate-500" />
-            Edit Profile
-          </Link>
+          {employee.employmentStatus === 'TERMINATED' ? (
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg shadow-xs">
+              <Lock className="w-3.5 h-3.5" />
+              Record Frozen (Terminated)
+            </span>
+          ) : (
+            <>
+              <Link
+                to={`/employees/${employee.id}/edit`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg shadow-xs hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <Edit className="w-4 h-4 text-slate-500" />
+                Edit Profile
+              </Link>
 
-          <Link
-            to={`/salary-revision/${employee.id}`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors"
-          >
-            <TrendingUp className="w-4 h-4" />
-            Revise Salary
-          </Link>
+              <Link
+                to={`/salary-revision/${employee.id}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 transition-colors cursor-pointer"
+              >
+                <TrendingUp className="w-4 h-4" />
+                Revise Salary
+              </Link>
 
-          {employee.employmentStatus !== 'TERMINATED' && (
-            <button
-              onClick={() => setShowTerminateModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg shadow-xs hover:bg-rose-100 transition-colors"
-            >
-              <UserX className="w-4 h-4" />
-              Terminate
-            </button>
+              <button
+                onClick={() => setShowTerminateModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg shadow-xs hover:bg-rose-100 transition-colors cursor-pointer"
+              >
+                <UserX className="w-4 h-4" />
+                Terminate
+              </button>
+            </>
           )}
         </div>
       </div>
+
+      {/* Frozen Alert for Terminated Employee */}
+      {employee.employmentStatus === 'TERMINATED' && (
+        <div className="p-4 rounded-xl bg-rose-50/80 border border-rose-200 text-rose-900 flex items-start gap-3 shadow-xs">
+          <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5 shrink-0" />
+          <div className="text-sm">
+            <p className="font-semibold">Terminated Employee — Records Locked</p>
+            <p className="text-xs text-rose-700 mt-0.5">
+              This employee was terminated{employee.dateOfLeaving ? ` on ${new Date(employee.dateOfLeaving).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}.
+              Their profile, personal details, and compensation structure are permanently frozen and cannot be updated or revised.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Unified Profile Header Card */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6">

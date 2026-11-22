@@ -182,13 +182,15 @@ export const EmployeeListPage: React.FC = () => {
             >
               <Eye className="w-4 h-4" />
             </Link>
-            <Link
-              to={`/salary-revision/${row.original.id}`}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition"
-              title="Revise Salary"
-            >
-              <TrendingUp className="w-4 h-4" />
-            </Link>
+            {row.original.employmentStatus !== 'TERMINATED' && (
+              <Link
+                to={`/salary-revision/${row.original.id}`}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition"
+                title="Revise Salary"
+              >
+                <TrendingUp className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         ),
       },

@@ -28,6 +28,10 @@ export class CreateEmployeeDto {
 
   @IsString()
   @IsOptional()
+  emailDomain?: string;
+
+  @IsString()
+  @IsOptional()
   dateOfBirth?: string;
 
   @IsString()

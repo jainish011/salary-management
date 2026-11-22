@@ -37,6 +37,7 @@ describe('DepartmentsService', () => {
           updatedAt: new Date(),
           headcount: '150',
           avgMonthlyCtc: '125000',
+          totalMonthlyCtc: '18750000',
         },
       ];
 
@@ -49,7 +50,15 @@ describe('DepartmentsService', () => {
         getRawMany: vi.fn().mockResolvedValue(mockRaw),
       };
 
-      mockDeptRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      const mockDeptRepository = {
+        findOne: vi.fn(),
+        find: vi.fn(),
+        create: vi.fn(),
+        save: vi.fn(),
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
+      };
+
+      service = new DepartmentsService(mockDeptRepository as any);
 
       const result = await service.findAll();
 
@@ -57,6 +66,7 @@ describe('DepartmentsService', () => {
       expect(result[0].name).toBe('Engineering');
       expect(result[0].headcount).toBe(150);
       expect(result[0].avgMonthlyCtc).toBe(125000);
+      expect(result[0].totalMonthlyCtc).toBe(18750000);
     });
   });
 

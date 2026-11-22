@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { SalaryStructuresService } from './salary-structures.service.js';
 import { RevisionReason } from '../entities/salary-structure.entity.js';
+import { EmploymentStatus } from '../entities/employee.entity.js';
 
 describe('SalaryStructuresService', () => {
   let service: SalaryStructuresService;
@@ -86,6 +87,22 @@ describe('SalaryStructuresService', () => {
       expect(mockQueryRunner.manager.save).toHaveBeenCalledWith(mockActiveStructure);
       expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.release).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException if employee is terminated', async () => {
+      mockEmployeeRepo.findOne.mockResolvedValue({
+        ...mockEmployee,
+        employmentStatus: EmploymentStatus.TERMINATED,
+      });
+
+      const dto = {
+        employeeId: 'emp-uuid-1',
+        annualCtc: 1500000,
+        effectiveFrom: '2024-04-01',
+        revisionReason: RevisionReason.APPRAISAL,
+      };
+
+      await expect(service.createRevision(dto)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw NotFoundException if employee is not found', async () => {

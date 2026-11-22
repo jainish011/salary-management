@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, IsNull } from 'typeorm';
-import { Employee } from '../entities/employee.entity.js';
+import { Employee, EmploymentStatus } from '../entities/employee.entity.js';
 import { SalaryStructure, RevisionReason } from '../entities/salary-structure.entity.js';
 import { AuditLog, AuditAction } from '../entities/audit-log.entity.js';
 import { CreateSalaryRevisionDto } from './dto/create-salary-revision.dto.js';
@@ -36,6 +36,12 @@ export class SalaryStructuresService {
     if (!employee) {
       throw new NotFoundException(
         `Employee with ID "${dto.employeeId}" not found`,
+      );
+    }
+
+    if (employee.employmentStatus === EmploymentStatus.TERMINATED) {
+      throw new BadRequestException(
+        'Cannot revise or update salary for a terminated employee. The record is permanently frozen.',
       );
     }
 

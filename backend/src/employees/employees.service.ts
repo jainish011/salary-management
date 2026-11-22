@@ -17,6 +17,8 @@ import { EmployeeQueryDto } from './dto/employee-query.dto.js';
 import { PaginatedResponse } from '../common/pagination.dto.js';
 import { calculateSalaryBreakup } from '../common/salary-calculator.util.js';
 
+export const ALLOWED_EMAIL_DOMAINS = ['acme.com', 'acmecorp.com', 'acme.in'];
+
 @Injectable()
 export class EmployeesService {
   constructor(
@@ -143,8 +145,36 @@ export class EmployeesService {
   }
 
   async create(dto: CreateEmployeeDto, userId?: string): Promise<any> {
+    const rawEmail = dto.email.toLowerCase().trim();
+    const emailParts = rawEmail.split('@');
+    if (emailParts.length !== 2 || !emailParts[0] || !emailParts[1]) {
+      throw new BadRequestException('Please provide a valid work email address');
+    }
+
+    const emailDomain = emailParts[1];
+
+    if (dto.emailDomain) {
+      const selectedDomain = dto.emailDomain.toLowerCase().replace(/^@/, '').trim();
+      if (!ALLOWED_EMAIL_DOMAINS.includes(selectedDomain)) {
+        throw new BadRequestException(
+          `Selected domain "@${selectedDomain}" is not an authorized company domain. Allowed domains: ${ALLOWED_EMAIL_DOMAINS.map((d) => '@' + d).join(', ')}`,
+        );
+      }
+      if (emailDomain !== selectedDomain) {
+        throw new BadRequestException(
+          `Email domain (@${emailDomain}) does not match the selected company domain (@${selectedDomain})`,
+        );
+      }
+    } else {
+      if (!ALLOWED_EMAIL_DOMAINS.includes(emailDomain)) {
+        throw new BadRequestException(
+          `Employee email must belong to an authorized company domain (${ALLOWED_EMAIL_DOMAINS.map((d) => '@' + d).join(', ')}). Domain "@${emailDomain}" is not permitted.`,
+        );
+      }
+    }
+
     const existing = await this.employeeRepository.findOne({
-      where: { email: dto.email.toLowerCase().trim() },
+      where: { email: rawEmail },
     });
 
     if (existing) {
@@ -270,6 +300,12 @@ export class EmployeesService {
       throw new NotFoundException(`Employee with ID "${id}" not found`);
     }
 
+    if (employee.employmentStatus === EmploymentStatus.TERMINATED) {
+      throw new BadRequestException(
+        'Cannot update profile of a terminated employee. The record is permanently frozen.',
+      );
+    }
+
     if (dto.departmentId && typeof this.dataSource?.getRepository === 'function') {
       const dept = await this.dataSource.getRepository(Department).findOne({
         where: { id: dto.departmentId },
@@ -315,13 +351,26 @@ export class EmployeesService {
     }
 
     if (dto.email && dto.email.toLowerCase().trim() !== employee.email) {
+      const cleanEmail = dto.email.toLowerCase().trim();
+      const emailParts = cleanEmail.split('@');
+      if (emailParts.length !== 2 || !emailParts[0] || !emailParts[1]) {
+        throw new BadRequestException('Please provide a valid work email address');
+      }
+
+      const emailDomain = emailParts[1];
+      if (!ALLOWED_EMAIL_DOMAINS.includes(emailDomain)) {
+        throw new BadRequestException(
+          `Employee email must belong to an authorized company domain (${ALLOWED_EMAIL_DOMAINS.map((d) => '@' + d).join(', ')}). Domain "@${emailDomain}" is not permitted.`,
+        );
+      }
+
       const existing = await this.employeeRepository.findOne({
-        where: { email: dto.email.toLowerCase().trim() },
+        where: { email: cleanEmail },
       });
       if (existing) {
         throw new ConflictException(`Email "${dto.email}" is already taken`);
       }
-      employee.email = dto.email.toLowerCase().trim();
+      employee.email = cleanEmail;
     }
 
     const oldValues = { ...employee };

@@ -12,6 +12,7 @@ import { UpdateDepartmentDto } from './dto/update-department.dto.js';
 export interface DepartmentWithStats extends Department {
   headcount: number;
   avgMonthlyCtc: number;
+  totalMonthlyCtc: number;
 }
 
 @Injectable()
@@ -41,8 +42,9 @@ export class DepartmentsService {
         'dept.description AS description',
         'dept.createdAt AS "createdAt"',
         'dept.updatedAt AS "updatedAt"',
-        'COUNT(DISTINCT emp.id) AS headcount',
-        'COALESCE(AVG(ss.monthlyCtc), 0) AS "avgMonthlyCtc"',
+        'COUNT(DISTINCT CASE WHEN emp.employmentStatus = :status THEN emp.id END) AS headcount',
+        'COALESCE(AVG(CASE WHEN emp.employmentStatus = :status THEN ss.monthlyCtc END), 0) AS "avgMonthlyCtc"',
+        'COALESCE(SUM(CASE WHEN emp.employmentStatus = :status THEN ss.monthlyCtc END), 0) AS "totalMonthlyCtc"',
       ])
       .groupBy('dept.id')
       .addGroupBy('dept.name')
@@ -61,6 +63,7 @@ export class DepartmentsService {
       employees: [],
       headcount: parseInt(row.headcount, 10) || 0,
       avgMonthlyCtc: Math.round(parseFloat(row.avgMonthlyCtc) || 0),
+      totalMonthlyCtc: Math.round(parseFloat(row.totalMonthlyCtc) || 0),
     }));
   }
 

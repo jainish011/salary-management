@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
   DollarSign,
   Info,
   Loader2,
+  Lock,
   TrendingUp,
 } from 'lucide-react';
 import { employeesApi } from '../../api/employees.js';
@@ -41,6 +43,7 @@ export const SalaryRevisionPage: React.FC = () => {
   });
 
   const currentSal = employee?.currentSalary;
+  const isTerminated = employee?.employmentStatus === 'TERMINATED';
 
   // Form State
   const [newAnnualCtc, setNewAnnualCtc] = useState<number>(1200000);
@@ -117,6 +120,7 @@ export const SalaryRevisionPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isTerminated) return;
     setSubmitError(null);
 
     if (!newAnnualCtc || newAnnualCtc < 100000) {
@@ -179,6 +183,19 @@ export const SalaryRevisionPage: React.FC = () => {
         title={`Revise Salary: ${employee.firstName} ${employee.lastName}`}
         description={`Record a new SCD Type 2 compensation revision for ${employee.employeeCode} (${employee.designation}). The previous salary will be preserved in historical records.`}
       />
+
+      {isTerminated && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-sm flex items-start gap-3 shadow-xs">
+          <AlertTriangle className="w-5 h-5 flex-shrink-0 text-rose-600 mt-0.5" />
+          <div>
+            <p className="font-semibold">Terminated Employee — Salary Frozen</p>
+            <p className="text-xs text-rose-700 mt-0.5">
+              This employee was terminated{employee.dateOfLeaving ? ` on ${new Date(employee.dateOfLeaving).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}.
+              Salary structures and compensation revisions cannot be submitted for terminated employees.
+            </p>
+          </div>
+        </div>
+      )}
 
       {submitError && (
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm flex items-center gap-3">
@@ -474,13 +491,18 @@ export const SalaryRevisionPage: React.FC = () => {
 
           <button
             type="submit"
-            disabled={revisionMutation.isPending}
-            className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={revisionMutation.isPending || isTerminated}
+            className="px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {revisionMutation.isPending ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Applying Revision...</span>
+              </>
+            ) : isTerminated ? (
+              <>
+                <Lock className="w-4 h-4" />
+                <span>Salary Frozen (Terminated)</span>
               </>
             ) : (
               <>
