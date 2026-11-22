@@ -33,9 +33,10 @@ export const reportsApi = {
 
   getExportCsvUrl: () => {
     const token = getAuthToken();
+    const base = import.meta.env.VITE_API_BASE_URL || '/api/v1';
     return token
-      ? `/api/v1/reports/export?token=${encodeURIComponent(token)}`
-      : '/api/v1/reports/export';
+      ? `${base}/reports/export?token=${encodeURIComponent(token)}`
+      : `${base}/reports/export`;
   },
 
   downloadEmployeesCsv: async () => {
