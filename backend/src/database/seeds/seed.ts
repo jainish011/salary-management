@@ -78,13 +78,23 @@ function calculateSalaryBreakup(annualCtc: number, isMetro: boolean) {
 async function runSeed() {
   console.log('🚀 Connecting to database for seeding...');
 
+  const dbUrl = process.env.DATABASE_URL;
+  const dbHost = process.env.DB_HOST || 'localhost';
+  const isRemote = dbHost !== 'localhost' && dbHost !== 'postgres';
+  const useSsl = process.env.DB_SSL === 'true' || isRemote;
+
   const dataSource = new DataSource({
     type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'jainish',
-    database: process.env.DB_NAME || 'acme_salary',
+    ...(dbUrl
+      ? { url: dbUrl }
+      : {
+          host: dbHost,
+          port: parseInt(process.env.DB_PORT || '5432', 10),
+          username: process.env.DB_USER || 'postgres',
+          password: process.env.DB_PASSWORD || 'jainish',
+          database: process.env.DB_NAME || 'acme_salary',
+        }),
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
     entities: [
       User,
       Department,

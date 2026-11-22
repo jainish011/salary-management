@@ -35,31 +35,43 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: parseInt(configService.get<string>('DB_PORT', '5432'), 10),
-        username: configService.get<string>('DB_USER', 'postgres'),
-        password: configService.get<string>('DB_PASSWORD', 'jainish'),
-        database: configService.get<string>('DB_NAME', 'acme_salary'),
-        entities: [
-          User,
-          Department,
-          Employee,
-          SalaryStructure,
-          PayrollPeriod,
-          Payslip,
-          PayslipItem,
-          AuditLog,
-        ],
-        autoLoadEntities: true,
-        synchronize: true,
-        extra: {
-          max: 20,
-          min: 5,
-          idleTimeoutMillis: 30000,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbUrl = configService.get<string>('DATABASE_URL');
+        const dbHost = configService.get<string>('DB_HOST', 'localhost');
+        const isRemote = dbHost !== 'localhost' && dbHost !== 'postgres';
+        const useSsl = configService.get<string>('DB_SSL') === 'true' || isRemote;
+
+        return {
+          type: 'postgres' as const,
+          ...(dbUrl
+            ? { url: dbUrl }
+            : {
+                host: dbHost,
+                port: parseInt(configService.get<string>('DB_PORT', '5432'), 10),
+                username: configService.get<string>('DB_USER', 'postgres'),
+                password: configService.get<string>('DB_PASSWORD', 'jainish'),
+                database: configService.get<string>('DB_NAME', 'acme_salary'),
+              }),
+          ssl: useSsl ? { rejectUnauthorized: false } : false,
+          entities: [
+            User,
+            Department,
+            Employee,
+            SalaryStructure,
+            PayrollPeriod,
+            Payslip,
+            PayslipItem,
+            AuditLog,
+          ],
+          autoLoadEntities: true,
+          synchronize: true,
+          extra: {
+            max: 20,
+            min: 2,
+            idleTimeoutMillis: 30000,
+          },
+        };
+      },
     }),
     AuthModule,
     DepartmentsModule,
