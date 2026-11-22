@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
@@ -13,6 +13,7 @@ import {
   TrendingUp,
   History,
   ArrowUpRight,
+  Loader2,
 } from 'lucide-react';
 import {
   BarChart,
@@ -41,6 +42,19 @@ const BAND_COLORS = [
 ];
 
 export const DashboardPage: React.FC = () => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportCsv = async () => {
+    try {
+      setIsExporting(true);
+      await reportsApi.downloadEmployeesCsv();
+    } catch (err) {
+      console.error('Failed to export employee CSV', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const {
     data: dashboard,
     isLoading: isDashLoading,
@@ -103,14 +117,24 @@ export const DashboardPage: React.FC = () => {
           <PlayCircle className="w-4 h-4 text-indigo-600" />
           <span>Payroll Cycles</span>
         </Link>
-        <a
-          href={reportsApi.getExportCsvUrl()}
-          download="employees-salary-report.csv"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-sm border border-emerald-200 shadow-xs transition-colors"
+        <button
+          onClick={handleExportCsv}
+          disabled={isExporting}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-sm border border-emerald-200 shadow-xs transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          title="Download Master Employee CSV"
         >
-          <Download className="w-4 h-4 text-emerald-600" />
-          <span>Export CSV</span>
-        </a>
+          {isExporting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+              <span>Exporting...</span>
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4 text-emerald-600" />
+              <span>Export CSV</span>
+            </>
+          )}
+        </button>
       </PageHeader>
 
       {/* 4 KPI Summary Cards */}

@@ -1,4 +1,4 @@
-import { api } from './client.js';
+import { api, getAuthToken } from './client.js';
 
 export const reportsApi = {
   getDashboard: async () => {
@@ -32,15 +32,22 @@ export const reportsApi = {
   },
 
   getExportCsvUrl: () => {
-    return '/api/v1/reports/export';
+    const token = getAuthToken();
+    return token
+      ? `/api/v1/reports/export?token=${encodeURIComponent(token)}`
+      : '/api/v1/reports/export';
   },
 
   downloadEmployeesCsv: async () => {
     const res = await api.get('/reports/export', { responseType: 'blob' });
-    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `employees-salary-report-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute(
+      'download',
+      `employees-salary-report-${new Date().toISOString().split('T')[0]}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     link.remove();
